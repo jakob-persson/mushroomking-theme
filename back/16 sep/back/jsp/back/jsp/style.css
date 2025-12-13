@@ -1,0 +1,95 @@
+/*
+Theme Name: JSP Portfolio
+Theme URI: https://yourwebsite.com/
+Author: Jakob S. Person
+Author URI: https://yourwebsite.com/
+Description: A modern portfolio theme built with Tailwind CSS and Alpine.js
+Version: 1.0
+*/
+
+
+@font-face {
+    font-family: 'Gilroy';
+    src: url('fonts/gilroy/Gilroy-Heavy.eot');
+    src: url('fonts/gilroy/Gilroy-Heavy.eot?#iefix') format('embedded-opentype'),
+        url('fonts/gilroy/fonts/Gilroy-Heavy.woff2') format('woff2'),
+        url('fonts/gilroy/Gilroy-Heavy.woff') format('woff'),
+        url('fonts/gilroy/Gilroy-Heavy.svg#Gilroy-Heavy') format('svg');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Link Sans';
+    src: url('fonts/link/LinkSans-Light.eot');
+    src: url('fonts/link/LinkSans-Light.eot?#iefix') format('embedded-opentype'),
+        url('fonts/link/LinkSans-Light.woff2') format('woff2'),
+        url('fonts/link/LinkSans-Light.woff') format('woff'),
+        url('fonts/link/LinkSans-Light.ttf') format('truetype'),
+        url('fonts/link/LinkSans-Light.svg#LinkSans-Light') format('svg');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Link Sans';
+    src: url('fonts/link/LinkSans-Medium.eot');
+    src: url('fonts/link/LinkSans-Medium.eot?#iefix') format('embedded-opentype'),
+        url('fonts/link/LinkSans-Medium.woff2') format('woff2'),
+        url('fonts/link/LinkSans-Medium.woff') format('woff'),
+        url('fonts/link/LinkSans-Medium.ttf') format('truetype'),
+        url('fonts/link/LinkSans-Medium.svg#LinkSans-Medium') format('svg');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+  font-family: 'Link sans'!important;
+  font-weight: 300!important;
+}
+
+.gilroy {
+    font-family: 'Gilroy';
+}
+
+.dark {
+    color:#1E2330!important
+}
+
+/* Hide scrollbar for webkit browsers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+/* Base input style */
+input {
+  background-color: #F6F7F5 !important;
+  color: #1E2330 !important;
+}
+
+/* Remove Chrome autofill yellow */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 1000px #F6F7F5 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #F6F7F5 inset !important;
+  -webkit-text-fill-color: #1E2330 !important;
+  caret-color: #1E2330 !important; /* keeps cursor color consistent */
+}
+
+/* Remove Firefox autofill background */
+input:autofill,
+textarea:autofill {
+  background-color: #F6F7F5 !important;
+  color: #1E2330 !important;
+}
+
+

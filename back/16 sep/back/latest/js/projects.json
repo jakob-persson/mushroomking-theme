@@ -1,0 +1,343 @@
+[
+  {
+    "images": [
+  {
+    "src": "images/TT/editor5.mp4",
+    "thumb": "images/TT/thumb3.png",
+    "caption": "Development mode preview using Livewire, Alpine.js, and Tailwind CSS"
+  },
+  { "src": "images/TT/tt.jpg", "caption": "Prototype of the start view of the Talentech Editor." },
+  { "src": "images/TT/tt2.jpg", "caption": "Prototype of package selection" },
+  { "src": "images/TT/tt3.jpg", "caption": "Prototype of adding extra channels" },
+  { "src": "images/TT/tt-edit.png", "caption": "Prototype of editing interface for ads" }
+],
+    "title": "Talentech editor",
+    "desc": "Project lead & UI/UX",
+    "topdesc": "<p><strong>Editorn</strong> kan kortfattat beskrivas som en motor som kontinuerligt läser av flödet av lediga jobb från ett företags karriärsida. Utifrån detta genereras automatiskt ett annonsutkast som användaren sedan kan publicera med ett knapptryck – eller välja att redigera först.</p><br><strong>Hur annonsen byggs upp</strong><br><p>Annonsens utformning varierar beroende på kundens uppsättning. <br><strong>Premiumkunder</strong> har ofta tillgång till ett fördefinierat mediebibliotek, där bilder anpassade efter deras grafiska profil används. Dessa bilder kompletteras med specialdesignade overlays – grafiklager med dynamisk text som anpassas efter det specifika jobbet. <strong>Basic-användare</strong> använder istället bilder från det globala mediebiblioteket, tillsammans med standardiserade overlays från det globala overlay-biblioteket.<p>",
+    "fullDesc": "<p><strong>Processen</strong><br>Användaren blir notifierad att hej det finns en färdig annons för detta jobbet som ni kan välja att publicera på olika sociala plattformar (Facebook,  Instagram, LinkedIn, Tiktok, Snapchat etc) eller jobbsidor så som (Indeed, FINN etc).  Den autogenererade jobbannonsen innehåller all information som krävs för att fungera på olika sociala plattformar. Innehållet hämtas vanligtvis från användarens ATS-flöde – ett informationsflöde som Editorn kontinuerligt läser av och bearbetar.</p>",
+    "text2": "<p><strong>Editera annons</strong><br> Användaren kan redigera i stort sett allt i det föreslagna utkastet av jobbannonsen – inklusive bilder, uppladdning av egna bilder eller videor, val av overlay samt redigering av texter. Det går också att välja att publicera annonsen på fler kanaler än de som initialt föreslagits. När användaren lägger till nya kanaler, skapas automatiskt utkast som är anpassade för respektive kanal, inklusive nya förhandsvisningar. </p>",
+    "text3": "<strong>Min roll</strong><br> Min roll i projektet har varit att ta fram prototyper i Figma utifrån krav och önskemål från stakeholders. Grundmålet har varit att vem som helst ska kunna öppna Editorn och publicera en jobbkampanj med endast ett knapptryck. Detta har ställt höga krav på en tydlig och visuellt tilltalande förhandsvisning, där korrekt information om varje jobb presenteras på ett sätt som skapar engagemang. Utöver designansvaret har jag även implementerat frontend från grunden baserat på prototyperna. Jag har främst arbetat med Livewire, Alpine.js och Tailwind CSS.",
+    "headline": "",
+    "caption1": "",
+    "projecttype": "Case",
+    "toolsUsed": "Project lead, UI/UX, Front-end",
+    "isAvailable": true
+  },
+
+    {
+    "images": [
+  { "src": "images/telia/order-top.jpg", "caption": "My Business - Order page" },
+  { "src": "images/telia/order.png", "caption": "My Business - Order full page" }
+  ],
+    "title": "Telia",
+    "desc": "UI/UX",
+    "topdesc":
+    "<p>Under min tid på Telia arbetade jag mot företagskunder i <strogn>Mybusiness</strong>. En av de första sakerna jag gjorde där var att skapa protyper i <strong>Sketch</strong> för en ny beställsida.<br>Det jag kortfattat gjorde var placera en stor bild i toppen samt att skapa ett luftigare gränssnitt. Detta för att skapa en lugnare och harmonisk känsla för besökaren. <br><br>Vidare så arbetede jag även med UX för hanteringen av att ”Lägga till användare” i TPP flödet. Detta innebär att användaren/kunden skall kunna administrera sina telefonnummer/abonnemang mm när en nyanställd börjar eller när en anställd slutar på företaget osv.</p>",
+    "fullDesc":
+    "<p></p>",
+    "text2":
+     "<p></p>",
+    "text3": "",
+    "headline": "",
+    "caption1": "",
+    "projecttype": "Case",
+    "toolsUsed": "UX/UI, Sketch",
+    "isAvailable": true
+  },
+
+
+  {
+    "images": [
+  { "src": "images/jt/master.jpg", "caption": "Top main page" },
+  { "src": "images/jt/master-full.png", "caption": "Main page full" },
+  { "src": "images/jt/careers.png", "caption": "Job openings page " },
+  { "src": "images/jt/article.png", "caption": "Article single page  " }
+    ],
+    "title": "Jobtip",
+    "desc": "Project lead, UI/UX, Front-end",
+    "topdesc": "<p><strong>To be Updated! Will soon add more content</strong><br><br> <strong>Project lead</strong>, <strong>UX/UI</strong> samt <strong>frontend</strong> för uppdatering av Jobtips hemsida. Nedan ser vi skisser från Figma som jag tagit fram.</p>",
+    "fullDesc": "<p></p>",
+    "text2": "",
+    "text3": "",
+    "headline": "",
+    "projecttype": "Case",
+    "caption1": "",
+    "toolsUsed": "Project lead, UI/UX, Front-end",
+    "isAvailable": true
+  },
+
+
+
+  {
+    "images": [
+  { "src": "images/kvd/salj-din-bil-1.png", "caption": "Steg 1 - Ange registreringsnummer" },
+  { "src": "images/kvd/salj-din-bil-3.png", "caption": "Steg 2 - Biluppgifter" },
+  { "src": "images/kvd/salj-din-bil-2.png", "caption": "Steg 2 - Ange tillval etc." }
+    ],
+    "title": "KVD - Bilpriser.se",
+    "desc": "Project lead, UI/UX, Front-end",
+    "topdesc": "<p>Jag jobbade på KVD.se/bilpriser.se mellan 2010 - 2015, under min tid där var jag bl.a med och tog fram en ny online identitet för kvd.se samt bilpriser.se. som lanserades omkring 2014. Jag projektledde stora av dessa delar på KVD's IT-avdelning, där jag skötte kontakter med externa parter samt den interna utvecklingen gällande front-end/UX delarna.</p><p>En stor del av detta var <strong>Sälj din bil</strong> som jag också valt att fokusera på här som blev en stor succe med en gång. Vi ville göra det möjligt för privatpersoner att enkelt kunna sälja sin bil via hemsidan. Målbilden var en enkel lösning för användaren där man startar resan genom att knappa in sitt registreringsnummer för att sedan ledas genom så få steg som möjligt till ett avslut. Mycket av information om bilarna hämtas från bilpriser.se som har en stor databas över bilar och modeller osv. </p><br><p><strong>Tillvägagångssätt</strong><p>I samband med lanseringen av nya KVD så lanserades tjänsten <strong>Sälj din bil</strong>. Min del var att ta lead för front-end utvecklingen, UX/UI på It-advdelnigen. Jag hade även ansvaret att sköta kommunikationen med marknadsavdelnigen genom arbetets gång. Detta gjorde vi genom att vi varje vecka hade 1-2 timmars avstämning där jag presentearde förslag på funktioner, funktionalitet och rent grafiska element. I samband med detta så presenterade även masknadsavdelningen förslag på olika funktioner eller innehåll de ville ha in på sidan. Vi använde oss även av användartetser där utvalda personer fick möjlighet prova olika funktioner för att sedan få en feedback på förbättringar eller förtydlingar i gränssnittet. </p>",
+    "fullDesc": "<p>Startsidan för Sälj din bil. Här anger besökaren smidigt sitt registringsnummer och miltal för sin bil för att sedan starta en värdering. I toppen av bilden ser vi en tidslinje som visar vart man befinner sig i processen från att man börjar fylla i uppgifter tills besökaren är klar. I botten av sidan finns det allmän information om tjänsten så som Så här fungerar det, Frågor & svar osv. Det finns valideringar så som att bilen inte får ha en mätarställning över 10 000 mil. </p>",
+    "text2": "Här har besökaren kommit till steg 2 i processen. Här visas det information om bilen med en korrekt bild på bil och modell som hämtas från KVD's egen databas. Det presenteras information om Miltal, märke, modell osv som hämtas från bilregistret. I den ljusa sektionen ville vi visa behovet som finns bland besökarna i form av hur många aktiva bud som i realtid finns på denna typen av bil.",
+    "text3": "Här kan besökaren lägga till de tillval som är aktuellt för bilen de vill sälja. Detta för att kunna samla in så mycket relevant information som möjligt samt att kunna göra en så precis värdering som möjligt.",
+    "headline": "",
+    "projecttype": "Case",
+    "caption1": "",
+    "toolsUsed": "Project lead, UI/UX, Front-end",
+    "isAvailable": true
+  },
+
+  {
+"images": [
+  { "src": "images/barium/barium-run.jpg", "caption": "" },
+  { "src": "images/barium/barium-run-desktop.png" }
+],
+    "title": "Barium Run",
+    "desc": "Design & Prototype",
+    "topdesc": "<p>Hösten 2016 började vi på UX/design avdelninngen på Barium att jobba med en ny grafisk profil för företaget. Detta innebar att vi skulle jobba fram ett nytt ansikte för <strong>Barium</strong>.</p><p>En stor del i detta arbetet bestod av att ta fram ett nytt gränssnitt för produkten BariumLive som är en del av produkten Bariums kunder arbetar i. I Bariums kundbas finns företag som IKEA, ICA, CSN m.fl.</p><p>Arbetet utfördes med hjälp utav olika personas som vi arbetade fram efter intervjuer med personer som dagligen arbetar i produkten samt personer som inte har en så stor vana att arbeta i produkten. Utifrån detta skapade vi olika personligheter som hade olika krav, förmågor osv.</p><p>Nedan visar jag 2 skisser utifrån hur en inloggad användare kommer att arbeta med inkommande uppgifter/ärenden i BariumLive.</p><br> <p><strong>Tillvägagångssätt</strong></p><p>Arbetet kring nytt UX/UI togs fram av designavdelningen på Barium. Vi arbetade som ett team och fokuserade emellanåt i större mån på olika delar. Min del bestod mycket av att jobba med den mobila upplevelsen och webben i allmänhet. Vi hade tighta avstämningar där vi presenterade och diskuterade olika lösningsalternativ. Vi hade även avstämningar med utvecklingsavdelningen kring funktionalitet osv. Är detta görbart, vad finns det för hinder osv.</p>",
+    "fullDesc": "<p>Barium \"Run\" som denna del av produkten kallas. Den här vyn möts man av som inloggad användare. Här administrerar man sina tilldelade arbetsuppgifter som ska utföras under dagen, veckan eller månaden osv.</p><p>Det vi ser överst är ett välkomstmeddelande med diverse praktisk informatiom så som dagens datum, nya notifieringar (meddelanden) samt en överblick hur man ligger till arbetsmässässigt så som \"Things are looking pretty good George\".</p><p>I listan får man en snabb överblick över sina arbetsuppgifter. Uppgifterna i listan har olika färgkoder, detta beroende på hur lång tid det är kvar tills att man ska ha utfört uppgiften. Arbetsuppgifterna öppnas i ett \"fullscreen overlay\" via Ajax för att slippa slussas mellan olika URL:er och laddningar.</p><p>Nederst så visas de senaste kommentarerna från medarbetare. Det kan handla om att man har en fråga gällande lämnade uppgifter på en arbetsuppgift man har utfört.</p>",
+"text2": "<p>Desktopversion av Barium \"Run\". Det som skiljer är att man visuellt ser lite fler filtreringsalternativ i desktopversionen. Dessa alternativ finns självklart tillgängligt i den mobila versionen också.</p><p>Ikonen längst ner till höger leder till Bariums \"modelleringsverktyg\".</p>",
+    "text3": "",
+    "headline": "",
+    "caption1": "",
+    "projecttype": "Case",
+    "toolsUsed": "Design, Prototype",
+    "isAvailable": true
+  },
+{
+ "images": [
+  { "src": "images/barium-web/barium-website-top.jpg", "caption": "" },
+  { "src": "images/barium-web/product.jpg", "caption": "" },
+  { "src": "images/barium-web/clients.jpg", "caption": "" },
+  { "src": "images/barium-web/seminars.jpg", "caption": "" },
+  { "src": "images/barium-web/resourches.jpg", "caption": "" }
+],
+  "title": "Barium web",
+  "desc": "UI/UX & Front-end",
+  "topdesc": "<p>I samband med framtagningen av <strong>Bariums</strong> grafiska profil deltog jag även i arbetet med att ta fram ett koncept för hur hemsidan skulle kunna se ut. Nedan visas skisser från det arbetet.</p>",
+  "headline": "",
+  "caption1": "",
+  "projecttype": "Project",
+  "toolsUsed": "",
+  "isAvailable": true
+},
+{
+  "images": [
+    {
+    "src": "images/rost/rost.mp4",
+    "thumb": "images/rost/rost1.jpg",
+    "caption": ""
+  },
+  { "src": "images/rost/rost2.jpg", "caption": "" }
+],
+  "title": "Røst Fishing",
+  "projecttype": "Project",
+  "desc": "Website",
+  "caption1": "",
+  "topdesc": "<p><strong>Hemsida</strong> och <strong>grafisk profil</strong> åt Røstfishing som är en av Norges hetaste fiskekamp. Här radas det upp Flundror, Torsk och Sej. <br> Sidan är byggd med ett eget tema i wordpress.</p>",
+  "text2": "",
+  "text3": "",
+  "link": "",
+  "linktext": "k",
+  "fullDesc": "",
+  "headline": "",
+  "toolsUsed": "Front-end, Wordpress, Illustrator, Photoshop",
+  "isAvailable": true
+},
+
+{
+    "images": [
+  { "src": "images/mcy/mcy-shirts.jpg", "caption": "" }
+  ],
+    "title": "Musicarry",
+    "desc": "Website",
+    "topdesc":
+    "<p>To be updated</p>",
+    "fullDesc":
+    "<p></p>",
+    "text2":
+     "<p></p>",
+    "text3":
+    "",
+    "headline": "",
+    "caption1": "",
+    "projecttype": "Project",
+    "toolsUsed": "Logo, UX/UI, Front-end",
+    "isAvailable": true
+  },
+
+{
+  "images": [
+  { "src": "images/pil/logo.png", "caption": "" },
+  { "src": "images/pil/top.png", "caption": "" },
+  { "src": "images/pil/bio.png", "caption": "" },
+  { "src": "images/pil/johnny.png", "caption": "" },
+  { "src": "images/pil/album.png", "caption": "" }
+],
+  "title": "Public Image LTD",
+  "projecttype": "Concept",
+  "desc": "Website",
+  "caption1": "",
+  "topdesc": "<p>Koncept för en hemsida för bandet <strong>Public Image LTD</strong>. Har här jag återskapat deras logotyper i Illustrator.</p>",
+  "text2": "",
+  "text3": "",
+  "fullDesc": "",
+  "headline": "",
+  "toolsUsed": "Illustrator, Photoshop",
+  "isAvailable": true
+},
+
+{
+"images": [
+  { "src": "images/MK/mush-shirt.jpg", "caption": "" },
+  { "src": "images/MK/mk-fb.jpg", "caption": "" },
+  { "src": "images/MK/mk1.jpg", "caption": "" },
+  { "src": "images/MK/dn.jpeg", "caption": "" },
+  { "src": "images/MK/sr.jpg", "caption": "" },
+  { "src": "images/MK/bh.jpg", "caption": "" },
+  { "src": "images/MK/gp.jpeg", "caption": "" }
+],
+  "title": "Mushroom King",
+  "link": "https://www.facebook.com/profile.php?id=100092724575076",
+  "linktext": "Visit Mushroom King on Facebook",
+  "projecttype": "Project",
+  "desc": "Grafisk profil",
+  "topdesc": "<p><strong>Mushroom King</strong> är en Facebook-sida jag har drivit i drygt två år, där jag delar med mig av våra svampäventyr runt om i Sverige. Just nu har sidan över  <strong>25,000</strong> följare. Jag har lyckats få stor spridning på mina Reels, med flera klipp som har visats över en miljon gånger – några till och med mellan tre och över fem miljoner visningar.<br>Jag har även medverkat i olika reportage i bland annat <strong>Svenska Dagbladet</strong>, <strong>Sveriges Radio</strong>, <strong>Göteborgs-Posten</strong>, <strong>Bohusläningen</strong> med flera.<br>Nedan visas några trycksaker i form av keps och t-shirt. Mitt arbete här har varit att ta fram en logotyp med en tydlig karaktär och en känsla av action och energi.</p>",
+  "fullDesc": "",
+  "caption1": "",
+  "headline": "",
+  "toolsUsed": "Illustrator, Photoshop",
+  "isAvailable": true
+},
+
+{
+  "images": [
+  { "src": "images/sofiehof/under4.png", "caption": "Main page" },
+  { "src": "images/sofiehof/under1.png", "caption": "Main page" },
+  { "src": "images/sofiehof/under3.png", "caption": "Upcoming event list" },
+  { "src": "images/sofiehof/under5.png", "caption": "Event page" },
+  { "src": "images/sofiehof/under2.png", "caption": "" }
+]
+,
+  "title": "Sofiehof Underjord",
+  "projecttype": "Project",
+  "caption1": "",
+  "desc": "Grafisk profil & Website",
+  "topdesc": "<p><strong>Hemsida</strong> och <strong>grafisk profil</strong> åt Sofiehof Underjord i Jönköping är en unik och populär konsertlokal med en rik historia. Vi erbjuder en alternativ och autentisk upplevelse för dig som älskar musik eller standup. Vi rör oss i många genrer med allt från indie, alternativt, elektro, experimentellt, rock’n roll till smattrande hårdrock och mörkaste black metal. Och på våra standupklubbar ser du några av landets bästa klubbkomiker. Vår scen är känd för sitt kraftfulla ljud och intensiva ljus, som skapar en elektrifierande atmosfär tillsammans med vår hängivna och entusiastiska publik.</p>",
+  "fullDesc": "",
+  "text2": "",
+  "text3": "",
+  "headline": "",
+  "toolsUsed": "UI/UX, Illustrator, Photoshop, Wordpress",
+  "isAvailable": true
+},
+
+{
+ "images": [
+  { "src": "images/duran-duran.jpg", "caption": "" }
+],
+  "title": "Logo design",
+  "projecttype": "Concept",
+  "desc": "Design & Prototype",
+  "fullDesc": "",
+  "caption1": "",
+  "headline": "",
+  "text2": "",
+  "text3": "",
+  "toolsUsed": "Illustrator, Photoshop",
+  "isAvailable": true
+},
+{
+ "images": [
+  { "src": "images/DD/rio1.jpg", "caption": "" },
+  { "src": "images/DD/rio2.jpg", "caption": "" },
+  { "src": "images/DD/fire1.jpg", "caption": "" },
+  { "src": "images/DD/fire2.jpg", "caption": "" },
+  { "src": "images/DD/dd.mov", "caption": "" }
+],
+
+  "title": "Album Story",
+  "projecttype": "Concept",
+  "desc": "Website",
+  "topdesc": "<p><strong>Album Story</strong> är ett koncept jag har lekt med lite då och då. Tanken är att skapa dedikerade sidor som ger en överblick över olika artisters skivor. Här ser vi <strong>Duran Duran</strong> med albumet Rio samt <strong>Blue Öyster Cult</strong> med skivan Fire of Unknown Origin.</p></p>",
+  "fullDesc": "",
+  "headline": "",
+  "caption1": "",
+  "text2": "",
+  "text3": "",
+  "toolsUsed": "UI/UX, Illustrator, Photoshop, Wordpress",
+  "isAvailable": true
+},
+
+{
+    "images": [
+  { "src": "images/yes/yes.jpg", "caption": "Recreating the YES logo " }
+  ],
+    "title": "YES Logo",
+    "desc": "Logo",
+    "topdesc":
+    "<p>Recreating the <strong>YES</strong>logo in Illustrator from their 1987 album <strong>Big Generator</strong></p>",
+    "fullDesc":
+    "<p></p>",
+    "text2":
+     "<p></p>",
+    "text3":
+    "",
+    "headline": "",
+    "caption1": "",
+    "projecttype": "Concept",
+    "toolsUsed": "Illustrator",
+    "isAvailable": true
+  },
+
+{
+    "images": [
+  { "src": "images/back/top.jpg", "caption": "" },
+  { "src": "images/back/album-info.jpg", "caption": "" },
+  { "src": "images/back/singles.jpg", "caption": "" },
+  { "src": "images/back/tracks.jpg", "caption": "" },
+  { "src": "images/back/band.jpg", "caption": "" }
+  ],
+    "title": "AC/DC - Back In Black",
+    "desc": "Website",
+    "topdesc":
+    "<p>Design och en konceptsida för plattan <strong>Back in Black</strong> med AC/DC från 1980. Nedan finns några skärmdupmar från hemsidan.</p>",
+    "fullDesc":
+    "<p></p>",
+    "text2":
+     "<p></p>",
+    "text3":
+    "",
+    "headline": "",
+    "caption1": "",
+    "projecttype": "Concept",
+    "toolsUsed": "Illustrator, Photoshop, UI/UX, Front-end",
+    "isAvailable": true
+  },
+
+{
+  "images": [
+    {
+    "src": "images/dd-slider/dd-slider.mp4",
+    "thumb": "images/dd-slider/dd-thumb.jpg",
+    "caption": ""
+  }
+
+],
+  "title": "Duran Duran slider",
+  "projecttype": "Concept",
+  "desc": "Website",
+  "caption1": "",
+  "topdesc": "<p><strong>To be updated</strog></p>",
+  "text2": "",
+  "text3": "",
+  "link": "",
+  "linktext": "k",
+  "fullDesc": "",
+  "headline": "",
+  "toolsUsed": "Front-end, Photoshop",
+  "isAvailable": true
+}
+
+
+]
