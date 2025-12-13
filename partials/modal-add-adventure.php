@@ -339,7 +339,6 @@
         </div>
     </div>
 </div>
-
 <script>
 function adventureModal() {
     return {
