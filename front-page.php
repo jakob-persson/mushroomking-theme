@@ -288,7 +288,7 @@
 
         <!-- RIGHT COLUMN (USER LIST) -->
            <div class="hidden lg:block lg:col-span-3 lg:sticky lg:top-0 h-fit pt-10">
-            <h3 class="text-sm  mb-4">Explore apa</h3>
+            <h3 class="text-sm  mb-4">Explore foragers</h3>
             <div class="bg-white rounded-3xl p-4 space-y-4">
             <?php
             // Hämta alla användare utom den inloggade
