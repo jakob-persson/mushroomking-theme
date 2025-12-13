@@ -99,7 +99,6 @@
         </div>
 
 
-        
         <!-- Main Content -->
         <div class="px-6 overflow-y-auto flex-grow space-y-7 pb-10">
             <!-- Text Blocks -->
