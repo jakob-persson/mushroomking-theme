@@ -29,6 +29,19 @@
     border-radius: 8px;
     transition: all 0.3s;
 }
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(30,35,48,0.2);
+    border-top-color: #1E2330;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 </style>
 <div 
     x-data="adventureModal()"
@@ -71,7 +84,7 @@
             <img src="<?= esc_url($avatar); ?>" class="w-12 h-12 rounded-full object-cover aspect-square" />
             <div class="flex flex-col leading-tight">
                 <span class="font-semibold text-sm mb-1"><?= esc_html($username); ?></span>
-               <span class="text-sm dark flex items-center gap-1">
+               <span class="text-sm dark flex items-center gap-3">
                 <!-- Clickable Location -->
              <button @click="view = 'location'" class="flex items-center gap-1 hover:opacity-70">
                 <i class="fas fa-map-marker-alt dark"></i>
@@ -139,15 +152,21 @@
                     </template>
 
                     <!-- NEW Dropdown -->
-                   <select
-                        class="w-[110px] px-2.5 py-2.5 border-2 border-[#1E2330] rounded-lg text-xs font-semibold bg-white"
+                   <div class="relative inline-block">
+                    <select
+                        class="w-[89px] px-2.5 py-2.5 pr-8 border-2 border-[#1E2330] rounded-lg text-xs font-semibold bg-white appearance-none"
                         @change="handleDropdownSelect($event)"
                     >
-                        <option value="">More types</option>
+                        <option value="">More</option>
                         <template x-for="extra in extraMushrooms" :key="extra">
                             <option :value="extra" x-text="extra"></option>
                         </template>
                     </select>
+
+                    <!-- Font Awesome Icon -->
+                    <i class="fa-solid fa-chevron-down absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#1E2330] text-xs"></i>
+                </div>
+
                 </div>
 
 
@@ -240,16 +259,18 @@
 
         <!-- Publish Button -->
         <div class="px-6 pb-6">
-            <button 
-                @click="!isPublishDisabled() && publish()"
-                :disabled="isPublishDisabled()"
-                :class="isPublishDisabled()
-                    ? 'bg-[#eff0ec] text-gray-500 cursor-not-allowed'
-                    : 'bg-[#1E2330] text-white cursor-pointer'"
-                class="w-full py-4 rounded-xl transition"
-            >
-                Publish adventure
-            </button>
+          <button 
+            @click="!isPublishDisabled() && !isPublishing && publish()"
+            :disabled="isPublishDisabled() || isPublishing"
+            :class="(isPublishDisabled() || isPublishing)
+                ? 'bg-[#eff0ec] text-gray-500 cursor-not-allowed'
+                : 'bg-[#1E2330] text-white cursor-pointer'"
+            class="w-full py-4 rounded-xl transition"
+        >
+            Publish adventure
+        </button>
+
+
 
         </div>
 
@@ -336,6 +357,35 @@
                 </div>
             </template>
         </div>
+
+<!-- Publishing Overlay -->
+<div
+    x-show="isPublishing || published"
+    x-transition.opacity
+    class="absolute inset-0 z-[60] bg-white/70 flex items-center justify-center"
+>
+    <div class="flex flex-col items-center gap-4">
+
+        <!-- Spinner (while publishing) -->
+        <template x-if="isPublishing">
+            <div class="spinner"></div>
+        </template>
+
+        <!-- Green checkmark (on success) -->
+        <template x-if="published">
+            <i class="fas fa-check-circle text-[#124C12] text-5xl"></i>
+        </template>
+
+        <!-- Text -->
+        <p class="text-sm font-semibold text-[#1E2330]">
+            <span x-show="isPublishing">Publishing adventure…</span>
+            <span x-show="published">Adventure published</span>
+        </p>
+
+    </div>
+</div>
+
+
     </div>
 </div>
 <script>
@@ -351,7 +401,8 @@ function adventureModal() {
         ],
         mushroomInputs: [],
         locationSelected: false,
-
+        isPublishing: false,
+        published: false,
         selectedMushroom: null,
         tempText: "",
         tempLocation: "",
@@ -512,53 +563,96 @@ function adventureModal() {
 
         
 
-        async publish() {
-            if (this.mushroomInputs.length === 0 || !this.mushroomInputs.some(i => i.amount)) {
-                alert("Please add at least one mushroom type with amount.");
-                return;
-            }
+      async publish() {
+    if (this.isPublishing) return;
 
-            const mushrooms = {};
-            this.mushroomInputs.forEach(input => {
-                if (input.amount) {
-                    mushrooms[input.type] = parseFloat(input.amount.toString().replace(',', '.'));
-                }
-            });
+    this.isPublishing = true;
+    this.published = false;
 
-            const formData = new FormData();
-            formData.append("action", window.isEditing ? "update_mushroom" : "add_mushroom");
-            if (window.isEditing) formData.append("adventure_id", window.editAdventureId);
-
-            formData.append("types", JSON.stringify(mushrooms));
-            formData.append("location", this.location || "");
-            formData.append("adventure_text", this.content.map(c => c.text).join("\n"));
-            formData.append("start_date", this.startDate || "");
-
-            if (this.$refs.fileInput.files) {
-                Array.from(this.$refs.fileInput.files).forEach(file => {
-                    formData.append("mushroom_photos[]", file);
-                });
-            }
-
-            try {
-                const res = await fetch(ajaxurl, { method: "POST", body: formData });
-                const result = await res.json();
-                if (!result.success) throw new Error(result.data || "Save failed");
-
-                alert("Adventure saved!");
-                this.close();
-                this.photos = [];
-                this.mushroomInputs = [];
-                this.content = [];
-                this.location = "";
-                this.$refs.fileInput.value = "";
-                window.isEditing = false;
-                window.editAdventureId = null;
-                location.reload();
-            } catch (err) {
-                alert("Error saving adventure: " + err.message);
-            }
+    try {
+        // Validate mushrooms
+        if (
+            this.mushroomInputs.length === 0 ||
+            !this.mushroomInputs.some(i => i.amount && i.amount.trim() !== "")
+        ) {
+            throw new Error("Please add at least one mushroom type with amount.");
         }
+
+        // Build mushrooms object
+        const mushrooms = {};
+        this.mushroomInputs.forEach(input => {
+            if (input.amount) {
+                mushrooms[input.type] = parseFloat(
+                    input.amount.toString().replace(',', '.')
+                );
+            }
+        });
+
+        // Build FormData
+        const formData = new FormData();
+        formData.append(
+            "action",
+            window.isEditing ? "update_mushroom" : "add_mushroom"
+        );
+
+        if (window.isEditing) {
+            formData.append("adventure_id", window.editAdventureId);
+        }
+
+        formData.append("types", JSON.stringify(mushrooms));
+        formData.append("location", this.location || "");
+        formData.append(
+            "adventure_text",
+            this.content.map(c => c.text).join("\n")
+        );
+        formData.append("start_date", this.startDate || "");
+
+        // Photos
+        if (this.$refs.fileInput?.files?.length) {
+            Array.from(this.$refs.fileInput.files).forEach(file => {
+                formData.append("mushroom_photos[]", file);
+            });
+        }
+
+        // Submit
+        const res = await fetch(ajaxurl, {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await res.json();
+        if (!result.success) {
+            throw new Error(result.data || "Save failed");
+        }
+
+        // Success → show "published" in overlay
+        this.isPublishing = false;
+        this.published = true;
+
+        // Close modal after short delay
+        setTimeout(() => {
+            this.close();
+
+            // Reset state
+            this.photos = [];
+            this.mushroomInputs = [];
+            this.content = [];
+            this.location = "";
+            this.$refs.fileInput.value = "";
+            window.isEditing = false;
+            window.editAdventureId = null;
+
+            location.reload();
+        }, 1200);
+
+    } catch (err) {
+        this.isPublishing = false;
+        this.published = false;
+        alert("Error saving adventure: " + err.message);
+    }
+}
+
+
     }
 }
 </script>

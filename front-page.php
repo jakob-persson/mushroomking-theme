@@ -209,10 +209,10 @@
             </div>
 
             <!-- Edit profile button -->
-            <a href="<?= esc_url( home_url('/edit-profile/') ); ?>"
+            <!-- <a href="<?= esc_url( home_url('/edit-profile/') ); ?>"
               class="inline-block mt-4 text-sm text-[#124C12] font-medium hover:underline">
                 Edit profile
-            </a>
+            </a> -->
         </div>
 
     </div>
