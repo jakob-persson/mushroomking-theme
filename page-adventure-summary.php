@@ -271,36 +271,32 @@ $user_data = get_userdata($hunt->user_id ?? 0);
                     
                         <li>
                <?php
-list($totals_by_type, $max_kg) = mk_parse_types($hunt->types ?? '', $hunt->type ?? null, $hunt->kilograms ?? null);
-arsort($totals_by_type);
+                list($totals_by_type, $max_kg) = mk_parse_types($hunt->types ?? '', $hunt->type ?? null, $hunt->kilograms ?? null);
+                arsort($totals_by_type);
 
-$adventure_data = [
-    'id' => (int) $hunt->id,
-    'username' => $username,
-    'location' => $hunt->location,
-    'date' => $hunt->start_date,
-    'adventure_text' => $hunt->adventure_text,
-    'types' => $totals_by_type, // ✅ skicka korrekt array
-    'photos' => json_decode($hunt->photo_url ?? '[]', true),
-    'kilograms' => floatval($hunt->kilograms ?? 0),
-];
+                $adventure_data = [
+                    'id' => (int) $hunt->id,
+                    'username' => $username,
+                    'location' => $hunt->location,
+                    'date' => $hunt->start_date,
+                    'adventure_text' => $hunt->adventure_text,
+                    'types' => $totals_by_type, // ✅ skicka korrekt array
+                    'photos' => json_decode($hunt->photo_url ?? '[]', true),
+                    'kilograms' => floatval($hunt->kilograms ?? 0),
+                ];
 
-$adventure_json = wp_json_encode($adventure_data, JSON_HEX_APOS | JSON_HEX_QUOT);
-$adventure_json_esc = htmlspecialchars($adventure_json, ENT_QUOTES, 'UTF-8');
-?>
-<button
-    @click="
-        $store.editAdventureModal.adventure = JSON.parse('<?= $adventure_json_esc ?>');
-        $store.editAdventureModal.open = true;
-        $store.editAdventureModal.loadFromStore();
-    "
-    class="block w-full text-left px-4 py-3 hover:bg-gray-100">
-    Edit Adventure
-</button>
-
-
-
-
+                $adventure_json = wp_json_encode($adventure_data, JSON_HEX_APOS | JSON_HEX_QUOT);
+                $adventure_json_esc = htmlspecialchars($adventure_json, ENT_QUOTES, 'UTF-8');
+                ?>
+                <button
+                    @click="
+                        $store.editAdventureModal.adventure = JSON.parse('<?= $adventure_json_esc ?>');
+                        $store.editAdventureModal.open = true;
+                        $store.editAdventureModal.loadFromStore();
+                    "
+                    class="block w-full text-left px-4 py-3 hover:bg-gray-100">
+                    Edit Adventure
+                </button>
 
 
 

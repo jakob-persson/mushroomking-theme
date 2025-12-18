@@ -201,6 +201,8 @@ function editAdventureModal() {
         content: [],
         tempText: '',
         tempLocation: '',
+        map: null,
+        marker: null,
         location: '',
         locationSelected: false,
         startDate: new Date().toISOString().split('T')[0],
@@ -236,6 +238,62 @@ function editAdventureModal() {
                 alert("Failed to load adventure: " + err.message);
             }
         },
+
+        init() {
+            this.$watch('view', async value => {
+                if (value === 'location') {
+                    await this.$nextTick();
+
+                    if (!this.$refs.locationInput || !window.google) return;
+
+                    const autocomplete = new google.maps.places.Autocomplete(
+                        this.$refs.locationInput,
+                        { types: ['(cities)'] }
+                    );
+
+                    autocomplete.addListener('place_changed', () => {
+                        const place = autocomplete.getPlace();
+                        if (!place.geometry?.location) return;
+
+                        // Extract city + country
+                        const cityComp = place.address_components.find(c =>
+                            c.types.includes('locality') || c.types.includes('sublocality')
+                        );
+                        const countryComp = place.address_components.find(c =>
+                            c.types.includes('country')
+                        );
+
+                        const city = cityComp?.long_name || '';
+                        const country = countryComp?.long_name || '';
+
+                        this.tempLocation =
+                            city && country ? `${city}, ${country}` : city || country;
+
+                        this.locationSelected = true;
+
+                        // Create or update map
+                        if (!this.map) {
+                            this.map = new google.maps.Map(this.$refs.mapContainer, {
+                                center: place.geometry.location,
+                                zoom: 12,
+                                disableDefaultUI: true,
+                                clickableIcons: false
+                            });
+
+                            this.marker = new google.maps.Marker({
+                                position: place.geometry.location,
+                                map: this.map
+                            });
+                        } else {
+                            this.map.setCenter(place.geometry.location);
+                            this.map.setZoom(12);
+                            this.marker.setPosition(place.geometry.location);
+                        }
+                    });
+                }
+            });
+        },
+
 
         // --- Load adventure from store ---
         loadFromStore() {
@@ -316,7 +374,15 @@ function editAdventureModal() {
         },
 
         // --- Location / Date ---
-        saveLocation() { this.location = this.tempLocation; this.view = 'main'; },
+        saveLocation() {
+            this.location = this.tempLocation;
+
+            // 🔑 KEEP STORE IN SYNC
+            this.$store.editAdventureModal.adventure.location = this.tempLocation;
+
+            this.view = 'main';
+        },
+
         saveDate() { this.startDate = this.tempDate || new Date().toISOString().split('T')[0]; this.view = 'main'; },
 
         // --- Mushrooms ---
