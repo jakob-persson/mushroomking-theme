@@ -285,36 +285,62 @@ document.addEventListener('alpine:init', () => {
                 <div class="text-white font-regular text-sm leading-snug mt-1"><?= esc_html(wp_trim_words($hunt->adventure_text, 15)); ?></div>
             </div>    
         </div>
-        <!-- Actions dropdown ligger UTANFÖR kortets div -->
-          <div class="absolute top-4 right-4" x-data="{ open: false }">
-              <button @click.stop="open = !open"
-               class="w-10 h-10 text-white rounded-full flex items-center justify-center">
-                    <i class="fas fa-ellipsis-h text-xl"></i>
-              </button>
-              <div x-show="open" x-transition @click.away="open = false"
-                  class="absolute right-0 mt-2 w-28 bg-white shadow-lg rounded-lg z-50">
-                 <button
-                  x-data
-                  data-hunt='<?= htmlspecialchars(json_encode($hunt_object), ENT_QUOTES, 'UTF-8') ?>'
-                  @click.stop="
-                      $store.editAdventureModal.adventure = JSON.parse($el.dataset.hunt);
-                      open = false;
-                      $nextTick(() => $store.editAdventureModal.open = true);
-                  "
-                  class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+        <!-- Actions -->
+          <div class="absolute top-4 right-4" x-data="{ open: true }">
+
+              <!-- More button -->
+              <button
+                  @click.stop="open = !open"
+                  :class="open
+                      ? 'bg-white dark shadow-md'
+                      : 'bg-transparent text-white'"
+                  class="w-10 h-10 rounded-full flex items-center justify-center transition"
               >
-                  Edit
+                  <i class="fas fa-ellipsis-h text-xl"></i>
               </button>
+
+              <!-- Dropdown -->
+              <div x-show="open" x-transition @click.away="open = false"
+                  class="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg z-50 p-4">
+
+                  <!-- Edit -->
+                  <button
+                      x-data
+                      data-hunt='<?= htmlspecialchars(json_encode($hunt_object), ENT_QUOTES, 'UTF-8') ?>'
+                      @click.stop="
+                          $store.editAdventureModal.adventure = JSON.parse($el.dataset.hunt);
+                          open = false;
+                          $nextTick(() => $store.editAdventureModal.open = true);
+                      "
+                      class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm dark hover:bg-[#eff0ec] rounded-md"
+                  >
+                      <i class="fas fa-pen w-4"></i>
+                      <span>Edit adventure</span>
+                  </button>
+
+                  <!-- Delete -->
+                  <?php if ( get_current_user_id() === intval($hunt->user_id) ) : ?>
+                  <button
+                      @click.stop="
+                          open = false;
+                          if (confirm('Are you sure you want to delete this adventure? This cannot be undone.')) {
+                              deleteAdventure(<?= intval($hunt->id); ?>);
+                          }
+                      "
+                      class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm dark hover:bg-[#eff0ec] rounded-md"
+                  >
+                      <i class="fas fa-trash-alt w-4"></i>
+                      <span>Delete</span>
+                  </button>
+                  <?php endif; ?>
 
               </div>
           </div>
-              </div>
+      </div>
 
 
-          <?php endforeach; ?>
-
-
-</div>
+      <?php endforeach; ?>
+  </div>
 
 
         <!-- RIGHT COLUMN (USER LIST) -->
@@ -392,80 +418,12 @@ document.addEventListener('alpine:init', () => {
 
     <!-- Image Collage Column -->
     <div class="flex-none w-full lg:flex-1 flex justify-center items-center mt-8 lg:mt-0 px-4">
-      <div class="relative w-full max-w-[400px] md:max-w-[560px] h-[400px] lg:h-[480px] [perspective:1200px] mx-auto
-                  scale-[0.78]  lg:scale-100 origin-top">
-
-        <!-- Collage wrapper -->
-        <div class="relative w-full h-full [transform-style:preserve-3d] mx-auto">
-
-          <?php if (!empty($adventure_photos[0])): ?>
-            <?php $first_photo = get_first_photo($adventure_photos[0]->photo_url); ?>
-            <!-- Top-right card -->
-            <div class="absolute top-0 right-0 w-[240px] sm:w-[270px] md:w-[300px] lg:w-[310px]
-                        h-[150px] sm:h-[170px] md:h-[190px] lg:h-[200px]
-                        rounded-[36px] overflow-hidden
-                        shadow-[0_40px_80px_rgba(0,0,0,0.15)]
-                        transform-gpu
-                        [transform-origin:18%_50%]
-                        [transform:perspective(1400px)_translateZ(12px)_rotateY(0deg)_rotateZ(-4deg)_skewX(-4deg)]">
-              <img src="<?= esc_url($first_photo); ?>"
-                   alt="Adventure"
-                   class="block w-full h-full object-cover">
-              <div class="absolute bottom-3 right-3 bg-[#F9D9F9] text-[#111827] text-xs sm:text-sm px-3 py-1 rounded-full lowercase shadow-md">
-                #<?= esc_html($adventure_photos[0]->location ?? 'unknown') ?>
-              </div>
-            </div>
-          <?php endif; ?>
-
-          <?php if (!empty($adventure_photos[1])): ?>
-            <?php $first_photo = get_first_photo($adventure_photos[1]->photo_url); ?>
-            <!-- Middle-left card -->
-            <div class="z-[3] absolute left-0 top-28 w-[240px] sm:w-[270px] md:w-[300px] lg:w-[310px]
-                        h-[150px] sm:h-[170px] md:h-[190px] lg:h-[200px]
-                        rounded-[36px] overflow-hidden
-                        shadow-[0_40px_80px_rgba(0,0,0,0.25)]
-                        transform-gpu
-                        [transform-origin:18%_50%]
-                        [transform:perspective(1400px)_translateZ(12px)_rotateY(0deg)_rotateZ(-4deg)_skewX(-4deg)]">
-              <img src="<?= esc_url($first_photo); ?>"
-                   alt="Adventure"
-                   class="block w-full h-full object-cover">
-              <div class="absolute bottom-3 left-3 bg-[#F9D9F9] text-[#111827] text-xs sm:text-sm px-3 py-1 rounded-full lowercase shadow-md">
-                #<?= esc_html($adventure_photos[1]->location ?? 'unknown') ?>
-              </div>
-            </div>
-          <?php endif; ?>
-
-          <?php if (!empty($adventure_photos[2])): ?>
-            <?php $first_photo = get_first_photo($adventure_photos[2]->photo_url); ?>
-            <!-- Bottom-right card -->
-            <div class="absolute bottom-4 right-0 w-[240px] sm:w-[270px] md:w-[300px] lg:w-[310px]
-                        h-[150px] sm:h-[170px] md:h-[190px] lg:h-[200px]
-                        rounded-[36px] overflow-hidden
-                        shadow-[0_40px_80px_rgba(0,0,0,0.2)]
-                        transform-gpu
-                        [transform-origin:18%_50%]
-                        [transform:perspective(1400px)_translateZ(12px)_rotateY(0deg)_rotateZ(-4deg)_skewX(-4deg)]">
-              <img src="<?= esc_url($first_photo); ?>"
-                   alt="Adventure"
-                   class="block w-full h-full object-cover">
-              <div class="absolute bottom-3 left-3 bg-[#F9D9F9] text-[#111827] text-xs sm:text-sm px-3 py-1 rounded-full lowercase shadow-md">
-                #<?= esc_html($adventure_photos[2]->location ?? 'unknown') ?>
-              </div>
-            </div>
-          <?php endif; ?>
-
-        </div>
-      </div>
-    </div>
+      <img src="<?= get_template_directory_uri(); ?>/images/main-screen.png" alt="Illustration">
 
   </div>
 </div>
 
 <?php endif; ?>
-
-
-
 <?php if ( !is_user_logged_in() ) : ?>
 <section class="bg-[#F5F5F3] py-20">
   <div class="section-wrapper mx-auto grid lg:grid-cols-2 gap-12 items-center">
@@ -537,3 +495,30 @@ document.addEventListener('alpine:init', () => {
  <?php get_template_part('partials/modal', 'edit-adventure'); ?>
  <?php get_template_part('partials/modal', 'adventure'); ?>
 <?php get_footer(); ?>
+<script>
+function deleteAdventure(adventureId) {
+    fetch("<?= admin_url('admin-ajax.php'); ?>", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+            action: "mk_delete_adventure",
+            adventure_id: adventureId,
+            _ajax_nonce: "<?= wp_create_nonce('mk_delete_adventure'); ?>"
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Simple reload (or you can remove the card via Alpine later)
+            location.reload();
+        } else {
+            alert(data.data || "Could not delete adventure.");
+        }
+    })
+    .catch(() => {
+        alert("Something went wrong.");
+    });
+}
+</script>

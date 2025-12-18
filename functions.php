@@ -482,3 +482,44 @@ if (!function_exists('my_update_mushroom_function')) {
     }
 }
 
+add_action('wp_ajax_mk_delete_adventure', 'mk_delete_adventure');
+
+function mk_delete_adventure() {
+    check_ajax_referer('mk_delete_adventure');
+
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authorized');
+    }
+
+    global $wpdb;
+
+    $adventure_id = intval($_POST['adventure_id']);
+    $user_id = get_current_user_id();
+
+    // Make sure user owns this adventure
+    $owner_id = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT user_id FROM {$wpdb->prefix}mushrooms WHERE id = %d",
+            $adventure_id
+        )
+    );
+
+    if (intval($owner_id) !== $user_id) {
+        wp_send_json_error('Permission denied');
+    }
+
+    // Delete adventure
+    $deleted = $wpdb->delete(
+        "{$wpdb->prefix}mushrooms",
+        ['id' => $adventure_id],
+        ['%d']
+    );
+
+    if ($deleted) {
+        wp_send_json_success();
+    } else {
+        wp_send_json_error('Delete failed');
+    }
+}
+
+
