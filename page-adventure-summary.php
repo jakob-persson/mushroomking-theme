@@ -155,7 +155,7 @@ $user_data = get_userdata($hunt->user_id ?? 0);
             x-init="$el.addEventListener('keydown', (e) => onKey(e));"
             x-cloak
             tabindex="0"
-            class="sticky top-0 w-full h-screen flex items-center justify-center select-none relative outline-none group"
+            class="w-full lg:h-screen h-auto flex items-center justify-center select-none relative outline-none group"
         >
             <!-- CLOSE BUTTON -->
             <button
@@ -215,22 +215,25 @@ $user_data = get_userdata($hunt->user_id ?? 0);
         </div>
       
 
-         <!-- RIGHT SIDE – FACEBOOK STYLE WHITE PANEL -->
-              <div class="w-full lg:w-[32%] bg-white px-8 pt-8
+         <!-- RIGHT SIDE -->
+              <div class="w-full lg:w-[32%] bg-white px-8 pt-8 pb-4 lg:pb-0
                 lg:sticky lg:bottom-0
                 order-1 lg:order-2">
 
                 <!-- MOBILE BACK BUTTON -->
-            <button
-                @click="$store.adventureModal.close()"
-                class="lg:hidden fixed top-0 left-0 z-[9999]
-                    mt-[calc(env(safe-area-inset-top)+8px)]
-                    ml-3
-                    w-10 h-10 flex items-center justify-center
-                    dark"
-            >
-                <i class="fas fa-chevron-left text-lg"></i>
-            </button>
+            <div class="lg:hidden fixed top-0 left-0 z-[9999]
+                        mt-[calc(env(safe-area-inset-top)+0px)]        
+                        w-full  flex items-center bg-white
+                        dark">    
+                <button
+                    @click="$store.adventureModal.close()"
+                    class="
+                         ml-3 w-10 h-10 flex items-center justify-center
+                        dark"
+                >
+                    <i class="fas fa-chevron-left text-lg"></i>
+                </button>
+            </div>
             <!-- HEADER -->
             <div class="flex space-between w-full pt-6 lg:pt-0"> 
               <?php 
@@ -267,61 +270,49 @@ $user_data = get_userdata($hunt->user_id ?? 0);
                     x-transition
                     class="absolute right-0 top-12 bg-white rounded-xl shadow-lg w-40 overflow-hidden z-50 border">
 
-                    <ul class="text-sm text-gray-800">
-                    
+                    <ul class="text-sm text-gray-800">  
                         <li>
-               <?php
-                list($totals_by_type, $max_kg) = mk_parse_types($hunt->types ?? '', $hunt->type ?? null, $hunt->kilograms ?? null);
-                arsort($totals_by_type);
+                        <?php
+                            list($totals_by_type, $max_kg) = mk_parse_types($hunt->types ?? '', $hunt->type ?? null, $hunt->kilograms ?? null);
+                            arsort($totals_by_type);
 
-                $adventure_data = [
-                    'id' => (int) $hunt->id,
-                    'username' => $username,
-                    'location' => $hunt->location,
-                    'date' => $hunt->start_date,
-                    'adventure_text' => $hunt->adventure_text,
-                    'types' => $totals_by_type, // ✅ skicka korrekt array
-                    'photos' => json_decode($hunt->photo_url ?? '[]', true),
-                    'kilograms' => floatval($hunt->kilograms ?? 0),
-                ];
+                            $adventure_data = [
+                                'id' => (int) $hunt->id,
+                                'username' => $username,
+                                'location' => $hunt->location,
+                                'date' => $hunt->start_date,
+                                'adventure_text' => $hunt->adventure_text,
+                                'types' => $totals_by_type, // ✅ skicka korrekt array
+                                'photos' => json_decode($hunt->photo_url ?? '[]', true),
+                                'kilograms' => floatval($hunt->kilograms ?? 0),
+                            ];
 
-                $adventure_json = wp_json_encode($adventure_data, JSON_HEX_APOS | JSON_HEX_QUOT);
-                $adventure_json_esc = htmlspecialchars($adventure_json, ENT_QUOTES, 'UTF-8');
-                ?>
-                <button
-                    @click="
-                        $store.editAdventureModal.adventure = JSON.parse('<?= $adventure_json_esc ?>');
-                        $store.editAdventureModal.open = true;
-                        $store.editAdventureModal.loadFromStore();
-                    "
-                    class="block w-full text-left px-4 py-3 hover:bg-gray-100">
-                    Edit Adventure
-                </button>
-
-
-
-                        </li>
-                     
-
-                   
-                           
-                            </ul>
-                        </div>
-                    </div>
-
+                            $adventure_json = wp_json_encode($adventure_data, JSON_HEX_APOS | JSON_HEX_QUOT);
+                            $adventure_json_esc = htmlspecialchars($adventure_json, ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <button
+                                @click="
+                                    $store.editAdventureModal.adventure = JSON.parse('<?= $adventure_json_esc ?>');
+                                    $store.editAdventureModal.open = true;
+                                    $store.editAdventureModal.loadFromStore();
+                                "
+                                class="block w-full text-left px-4 py-3 hover:bg-gray-100">
+                                Edit Adventure
+                            </button>
+                        </li>   
+                    </ul>
                 </div>
-
             </div>
+        </div>
+    </div>
 
-      
-
-
+    
         <!-- ADVENTURE TEXT -->
         <div class="mt-4 leading-relaxed text-gray-800 text-[15px]">
-                    <h1 class="leading-tight dark text- font-semibold mb-2 text-3xl gilroy">
-                        <?= esc_html($hunt->location) ?>
-                    </h1>
-                <span class="text-base"><?= wp_kses_post($hunt->adventure_text) ?></span>
+            <h1 class="leading-tight dark text- font-semibold mb-2 text-3xl gilroy">
+                <?= esc_html($hunt->location) ?>
+            </h1>
+            <span class="text-base"><?= wp_kses_post($hunt->adventure_text) ?></span>
         </div>
 
         <!-- MUSHROOM LIST -->
@@ -339,7 +330,7 @@ $user_data = get_userdata($hunt->user_id ?? 0);
                             </span>
                     
                         </div>
-         <?php endforeach; ?>
+                    <?php endforeach; ?>
                 </div>
 
                 <!-- <div class="flex justify-between pt-2 text-gray-600 text-sm px-4">
@@ -347,16 +338,9 @@ $user_data = get_userdata($hunt->user_id ?? 0);
                     <span><?= $total_weight ?> kg</span>
                 </div> -->
         </div>
-
-
-
-
-    
-
     </div>
 </div>
 </main>
 
- <?php get_template_part('partials/modal', 'edit-adventure'); ?>
 
 <?php get_footer(); ?>
