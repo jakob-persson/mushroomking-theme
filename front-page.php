@@ -227,7 +227,7 @@ document.addEventListener('alpine:init', () => {
     </div>
 
     <!-- MIDDLE COLUMN (FEED) -->
-    <div class="col-span-12 lg:col-span-6 overflow-y-scroll h-screen pt-10 px-4 lg:pl-6 lg:pr-4 space-y-8">
+    <div class="col-span-12 lg:col-span-6 overflow-y-scroll h-screen pt-10  lg:pl-6 lg:pr-4 space-y-8">
 
    <?php foreach ( $hunts as $hunt ) : ?>
     <?php 
@@ -271,7 +271,7 @@ document.addEventListener('alpine:init', () => {
         <div class="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-black/60 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
 
-        <div class="absolute top-4 left-4 flex items-center gap-3 z-20">
+        <div class="absolute top-4 left-4 flex items-center gap-3 z-20 w-[50%]">
             <img src="<?= esc_url($avatar); ?>" class="w-10 h-10 rounded-full shadow-md object-cover">
             <div class="text-white drop-shadow text-sm"><?= esc_html($username); ?></div>
         </div>
