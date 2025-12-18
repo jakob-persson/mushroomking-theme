@@ -10,6 +10,15 @@
     <script>
       window.wpHuntId = <?= json_encode(get_query_var('hunt')); ?>;
     </script>
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.store('editAdventureModal', {
+        adventure: {},
+        open: false,
+        close() { this.open = false; },
+    });
+});
+</script>
 
 
 
@@ -220,68 +229,73 @@
     <!-- MIDDLE COLUMN (FEED) -->
     <div class="col-span-12 lg:col-span-6 overflow-y-scroll h-screen pt-10 px-4 lg:pl-6 lg:pr-4 space-y-8">
 
-    <?php foreach ( $hunts as $hunt ) : ?>
-        <?php 
-            // Ensure integer user ID
-            $user_id = intval($hunt->user_id);
-            $user = get_user_by('id', $user_id);
-            $username = $user ? $user->display_name : 'Unknown';
-            $avatar = mk_get_user_avatar($user_id);
+   <?php foreach ( $hunts as $hunt ) : ?>
+    <?php 
+        // Ensure integer user ID
+        $user_id = intval($hunt->user_id);
+        $user = get_user_by('id', $user_id);
+        $username = $user ? $user->display_name : 'Unknown';
+        $avatar = mk_get_user_avatar($user_id);
 
-            // Get photos as array
-            $photos = json_decode($hunt->photo_url, true);
-            if (!$photos || !is_array($photos)) {
-                $photos = [$hunt->photo_url ?: get_template_directory_uri() . "/images/placeholder.png"];
-            }
+        // Get photos as array
+        $photos = json_decode($hunt->photo_url, true);
+        if (!$photos || !is_array($photos)) {
+            $photos = [$hunt->photo_url ?: get_template_directory_uri() . "/images/placeholder.png"];
+        }
 
-            // Only use the first photo for the feed
-            $first_photo = $photos[0];
+        $first_photo = $photos[0];
 
-            // Format weight
-            $weight = rtrim(rtrim(number_format((float)$hunt->kilograms, 2, ',', ''), '0'), ',');
-            
-            // Prepare the object for the modal
-            $hunt_object = [
-                'id'             => intval($hunt->id),
-                'photos'         => $photos, // send all photos for the modal
-                'photo'          => $first_photo, // first photo for feed
-                'location'       => $hunt->location,
-                'date'           => $hunt->start_date,
-                'username'       => $username,
-                'user_id'        => $hunt->user_id,
-                'total_kg'       => floatval($hunt->kilograms ?? 0),
-                'type'           => $hunt->type ?? '{}',
-                'adventure_text' => $hunt->adventure_text ?? '',
-            ];
-        ?>
+        $weight = rtrim(rtrim(number_format((float)$hunt->kilograms, 2, ',', ''), '0'), ',');
 
-        <div 
-            class="relative bg-white rounded-[30px] overflow-hidden shadow-sm cursor-pointer ml-[1px]"
-            style="width: calc(100% - 11px); aspect-ratio: 1 / 1;"
-            @click='$store.adventureModal.open(<?= json_encode($hunt_object, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'
-        >
-            <img src="<?= esc_url($first_photo); ?>" class="absolute inset-0 w-full h-full object-cover">
+        $hunt_object = [
+            'id'             => intval($hunt->id),
+            'photos'         => $photos,
+            'photo'          => $first_photo,
+            'location'       => $hunt->location,
+            'date'           => $hunt->start_date,
+            'username'       => $username,
+            'user_id'        => $hunt->user_id,
+            'total_kg'       => floatval($hunt->kilograms ?? 0),
+            'type'           => $hunt->type ?? '{}',
+            'adventure_text' => $hunt->adventure_text ?? '',
+        ];
+    ?>
 
-            <div class="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-black/60 to-transparent"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+    <div 
+        class="relative bg-white rounded-[30px] overflow-hidden shadow-sm cursor-pointer ml-[1px]"
+        style="width: calc(100% - 11px); aspect-ratio: 1 / 1;"
+        @click='$store.adventureModal.open(<?= json_encode($hunt_object, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'
+    >
+        <img src="<?= esc_url($first_photo); ?>" class="absolute inset-0 w-full h-full object-cover">
 
-            <div class="absolute top-4 left-4 flex items-center gap-3 z-20">
-                <img src="<?= esc_url($avatar); ?>" class="w-10 h-10 rounded-full shadow-md object-cover">
-                <div class="text-white drop-shadow text-sm"><?= esc_html($username); ?></div>
-            </div>
+        <div class="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-black/60 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
 
-            <div class="absolute bottom-4 lg:bottom-6 left-6 right-6 rounded-[30px] pb-6 flex justify-between items-start z-30">
-                <div class="max-w-[100%] flex flex-col">
-                    <div class="text-white text-2xl gilroy" style="line-height:18px"><?= esc_html($hunt->location); ?></div>
-                    <div class="text-white">
-                        <span class="font-regular text-xs"><?= esc_html($hunt->start_date); ?> • <?= esc_html($weight); ?>kg</span>
-                    </div>
-                    <div class="text-white font-regular text-sm leading-snug mt-1"><?= esc_html(wp_trim_words($hunt->adventure_text, 15)); ?></div>
-                </div>
-            </div>
+        <div class="absolute top-4 left-4 flex items-center gap-3 z-20">
+            <img src="<?= esc_url($avatar); ?>" class="w-10 h-10 rounded-full shadow-md object-cover">
+            <div class="text-white drop-shadow text-sm"><?= esc_html($username); ?></div>
         </div>
 
-    <?php endforeach; ?>
+        <div class="absolute bottom-4 lg:bottom-6 left-6 right-6 rounded-[30px] pb-6 flex justify-between items-start z-30">
+            <div class="max-w-[100%] flex flex-col">
+                <div class="text-white text-2xl gilroy" style="line-height:18px"><?= esc_html($hunt->location); ?></div>
+                <div class="text-white">
+                    <span class="font-regular text-xs"><?= esc_html($hunt->start_date); ?> • <?= esc_html($weight); ?>kg</span>
+                </div>
+                <div class="text-white font-regular text-sm leading-snug mt-1"><?= esc_html(wp_trim_words($hunt->adventure_text, 15)); ?></div>
+            </div>
+
+          <!-- EDIT BUTTON -->
+<button
+    class="absolute top-4 right-4 bg-white/80 text-sm px-2 py-1 rounded z-40"
+    @click.stop='$store.editAdventureModal.adventure = <?= json_encode($hunt_object, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>; $store.editAdventureModal.open = true;'
+>
+    Edit
+</button>
+        </div>
+    </div>
+<?php endforeach; ?>
+
 
 </div>
 
@@ -503,5 +517,6 @@
     <?php endif; ?>
     <?php get_template_part('partials/modal-summary-adventure');
  ?>
+ <?php get_template_part('partials/modal', 'edit-adventure'); ?>
  <?php get_template_part('partials/modal', 'adventure'); ?>
 <?php get_footer(); ?>

@@ -100,19 +100,10 @@ $mushroom_icons = [
 $default_icon = home_url('/wp-content/themes/jsp/images/default.jpg');
 
 $user_data = get_userdata($hunt->user_id ?? 0);
-?>
-<?php if($can_edit && $is_editing): ?>
-<form id="adventure-form" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="adventure_id" value="<?= esc_attr($hunt->id) ?>">
-    <div class="w-full flex justify-end mb-8">
-    <button
-        @click.prevent="$store.adventureModal.saveAdventure()"
-        class="bg-[#E9C0E9] px-8 py-4 rounded-full font-medium text-[#1E1E1E] hover:opacity-90">
-        Save Adventure
-    </button>
-</div>
 
-<?php endif; ?>
+
+?>
+
 <style>
 .fb-arrow {
     background: rgba(0,0,0,0.4);
@@ -277,19 +268,47 @@ $user_data = get_userdata($hunt->user_id ?? 0);
                     class="absolute right-0 top-12 bg-white rounded-xl shadow-lg w-40 overflow-hidden z-50 border">
 
                     <ul class="text-sm text-gray-800">
-                        <?php if(!$is_editing): ?>
+                    
                         <li>
-                            <a href="#" id="page-edit-btn" data-hunt="<?= $hunt->id ?>"
-                            class="block px-4 py-3 hover:bg-gray-100">Edit Adventure</a>
-                        </li>
-                        <?php endif; ?>
+               <?php
+list($totals_by_type, $max_kg) = mk_parse_types($hunt->types ?? '', $hunt->type ?? null, $hunt->kilograms ?? null);
+arsort($totals_by_type);
 
-                        <?php if($is_editing): ?>
-                        <li>
-                            <a href="#" id="page-cancel-edit-btn" data-hunt="<?= $hunt->id ?>"
-                            class="block px-4 py-3 hover:bg-gray-100">Cancel Edit</a>
-                                </li>
-                                <?php endif; ?>
+$adventure_data = [
+    'id' => (int) $hunt->id,
+    'username' => $username,
+    'location' => $hunt->location,
+    'date' => $hunt->start_date,
+    'adventure_text' => $hunt->adventure_text,
+    'types' => $totals_by_type, // ✅ skicka korrekt array
+    'photos' => json_decode($hunt->photo_url ?? '[]', true),
+    'kilograms' => floatval($hunt->kilograms ?? 0),
+];
+
+$adventure_json = wp_json_encode($adventure_data, JSON_HEX_APOS | JSON_HEX_QUOT);
+$adventure_json_esc = htmlspecialchars($adventure_json, ENT_QUOTES, 'UTF-8');
+?>
+<button
+    @click="
+        $store.editAdventureModal.adventure = JSON.parse('<?= $adventure_json_esc ?>');
+        $store.editAdventureModal.open = true;
+        $store.editAdventureModal.loadFromStore();
+    "
+    class="block w-full text-left px-4 py-3 hover:bg-gray-100">
+    Edit Adventure
+</button>
+
+
+
+
+
+
+
+                        </li>
+                     
+
+                   
+                           
                             </ul>
                         </div>
                     </div>
@@ -298,40 +317,16 @@ $user_data = get_userdata($hunt->user_id ?? 0);
 
             </div>
 
-        <!-- DATE FIELD IN EDIT MODE -->
-        <?php if($is_editing): ?>
-            <div class="mt-4">
-                <label class="font-semibold text-sm text-gray-700">Date</label>
-                <input type="date" name="start_date" id="start_date"
-                       value="<?= esc_attr($hunt->start_date) ?>"
-                       class="w-full p-2 mt-1 border rounded">
-            </div>
-        <?php endif; ?>
+      
 
 
         <!-- ADVENTURE TEXT -->
         <div class="mt-4 leading-relaxed text-gray-800 text-[15px]">
-             <?php if($is_editing): ?>
-                    <input type="text" name="location" id="location"
-                           value="<?= esc_attr($hunt->location) ?>"
-                           class="w-full text-5xl font-bold mb-3 rounded p-2 border text-[#FF9313]">
-                <?php else: ?>
                     <h1 class="leading-tight dark text- font-semibold mb-2 text-3xl gilroy">
                         <?= esc_html($hunt->location) ?>
                     </h1>
-                <?php endif; ?>
-            <?php if($is_editing): ?>
-                <textarea id="adventure_text" name="adventure_text"
-                          class="w-full p-3 rounded border bg-gray-50 min-h-[160px]">
-                    <?= esc_textarea($hunt->adventure_text) ?>
-                </textarea>
-            <?php else: ?>
                 <span class="text-base"><?= wp_kses_post($hunt->adventure_text) ?></span>
-            <?php endif; ?>
         </div>
-
-
-
 
         <!-- MUSHROOM LIST -->
         <div class="mt-10">
@@ -341,28 +336,14 @@ $user_data = get_userdata($hunt->user_id ?? 0);
                         <div class="flex items-center justify-between bg-white p-4 rounded-xl bg-[#ECECE9]">
 
                             <div class="flex items-center gap-3">
-                                <!-- <img src="<?= esc_url($mushroom_icons[$type] ?? $default_icon) ?>"
-                                     class="w-10 h-10 rounded-full"> -->
-
-                                <?php if($is_editing): ?>
-                                    <input type="number"
-                                           name="types[<?= esc_attr($type) ?>]"
-                                           value="<?= esc_attr($kg) ?>"
-                                           step="0.01"
-                                           class="w-20 p-2 border rounded">
-                                <?php else: ?>
-                                    <span class="font-semibold text-sm"><?= esc_html($type) ?></span>
-                                <?php endif; ?>
+                                <span class="font-semibold text-sm"><?= esc_html($type) ?></span>      
                             </div>
-
-                            <?php if(!$is_editing): ?>
-                                <span class="text-sm font-semibold">
-                                    <?= rtrim(rtrim(number_format($kg,2,'.',''),'0'),'.') ?> kg
-                                </span>
-                            <?php endif; ?>
-
+                            <span class="text-sm font-semibold">
+                                <?= rtrim(rtrim(number_format($kg,2,'.',''),'0'),'.') ?> kg
+                            </span>
+                    
                         </div>
-                    <?php endforeach; ?>
+         <?php endforeach; ?>
                 </div>
 
                 <!-- <div class="flex justify-between pt-2 text-gray-600 text-sm px-4">
@@ -374,50 +355,12 @@ $user_data = get_userdata($hunt->user_id ?? 0);
 
 
 
-        <!-- MEDIA -->
-        <div class="mt-8">
-            <div class="dark text-sm font-semibold mb-3">Media</div>
-
-            <div class=" border-[#ECECE9] border rounded-2xl p-4">
-
-                <?php if($is_editing): ?>
-                    <label class="font-semibold mb-2 block">Upload Photos</label>
-                    <input type="file" multiple name="mushroom_photos[]" class="mb-4 block w-full">
-                <?php endif; ?>
-
-                <?php if(!empty($photo_urls)): ?>
-                    <?php
-                        $max_display = 4;
-                        $total = count($photo_urls);
-                        $display_photos = array_slice($photo_urls, 0, $max_display);
-                    ?>
-
-                    <div class="grid grid-cols-4 gap-3">
-                        <?php foreach($display_photos as $index => $url): ?>
-                            <div class="relative w-full aspect-square rounded-xl overflow-hidden cursor-pointer"
-                                 @click="$store.adventureModal.openPhoto('<?= esc_url($url) ?>')">
-
-                                <img src="<?= esc_url($url) ?>"
-                                     class="w-full h-full object-cover">
-
-                                <?php if($index === $max_display - 1 && $total > $max_display): ?>
-                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center
-                                                text-white text-2xl font-bold">
-                                        +<?= $total - $max_display ?>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-
-            </div>
-        </div>
+    
 
     </div>
 </div>
 </main>
 
-
+ <?php get_template_part('partials/modal', 'edit-adventure'); ?>
 
 <?php get_footer(); ?>

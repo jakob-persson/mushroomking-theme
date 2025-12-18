@@ -401,3 +401,84 @@ add_action('wp_enqueue_scripts', 'mk_enable_frontend_editor');
 
 
 
+add_action('wp_ajax_update_mushroom', 'my_update_mushroom_function');
+if (!function_exists('my_update_mushroom_function')) {
+    add_action('wp_ajax_update_mushroom', 'my_update_mushroom_function');
+    function my_update_mushroom_function() {
+        global $wpdb;
+
+        $user_id = get_current_user_id();
+        if (!$user_id) wp_send_json_error('User not logged in');
+
+        $adventure_id = intval($_POST['adventure_id'] ?? 0);
+        if (!$adventure_id) wp_send_json_error('Adventure ID missing');
+
+        $hunt = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}mushrooms WHERE id=%d", $adventure_id));
+        if (!$hunt) wp_send_json_error('Adventure not found');
+        if ($hunt->user_id != $user_id) wp_send_json_error('Not authorized');
+
+        $location = sanitize_text_field($_POST['location'] ?? '');
+        $start_date = sanitize_text_field($_POST['start_date'] ?? '');
+        $adventure_text = wp_kses_post($_POST['adventure_text'] ?? '');
+
+        $types = [];
+        if (!empty($_POST['types']) && is_array($_POST['types'])) {
+            foreach ($_POST['types'] as $type => $amount) {
+                $types[$type] = floatval($amount);
+            }
+        }
+
+        $existing_photos = [];
+        if (!empty($_POST['existing_photos']) && is_array($_POST['existing_photos'])) {
+            $existing_photos = $_POST['existing_photos'];
+        }
+
+        if (!empty($_FILES['mushroom_photos']['name'][0])) {
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            require_once(ABSPATH . 'wp-admin/includes/media.php');
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+
+            foreach ($_FILES['mushroom_photos']['name'] as $key => $name) {
+                if ($_FILES['mushroom_photos']['error'][$key] === 0) {
+                    $file_array = [
+                        'name' => $_FILES['mushroom_photos']['name'][$key],
+                        'tmp_name' => $_FILES['mushroom_photos']['tmp_name'][$key]
+                    ];
+                    $attachment_id = media_handle_sideload($file_array, 0);
+                    if (!is_wp_error($attachment_id)) {
+                        $existing_photos[] = wp_get_attachment_url($attachment_id);
+                    }
+                }
+            }
+        }
+
+        $updated = $wpdb->update(
+            "{$wpdb->prefix}mushrooms",
+            [
+                'location' => $location,
+                'start_date' => $start_date,
+                'adventure_text' => $adventure_text,
+                'types' => wp_json_encode($types),
+                'photo_url' => wp_json_encode($existing_photos),
+                'kilograms' => round(array_sum($types), 2)
+            ],
+            ['id' => $adventure_id],
+            ['%s','%s','%s','%s','%s','%f'],
+            ['%d']
+        );
+
+        if ($updated === false) {
+            wp_send_json_error($wpdb->last_error);
+        } else {
+            wp_send_json_success([
+                'adventure_id' => $adventure_id,
+                'location' => $location,
+                'start_date' => $start_date,
+                'adventure_text' => $adventure_text,
+                'types' => $types,
+                'photos' => $existing_photos
+            ]);
+        }
+    }
+}
+

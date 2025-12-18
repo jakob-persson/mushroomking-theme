@@ -26,6 +26,22 @@
 
       <?php wp_head(); ?>
     </head>
+    <script>
+document.addEventListener('alpine:init', () => {
+    Alpine.store('editAdventureModal', {
+        adventure: {},
+        open: false,
+        close() { this.open = false; },
+        openModal(data) {
+            this.adventure = data;
+            this.open = true;
+        }
+    });
+});
+
+</script>
+
+
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
@@ -185,13 +201,6 @@ if ( is_front_page() && is_user_logged_in() ) {
           $extra_classes .= ' bg-[#124C12]';
       }
       ?>
-
-
-
-
-
-
-
     <body <?php body_class("template-login $extra_classes"); ?> x-data>
     <!-- Header -->
 

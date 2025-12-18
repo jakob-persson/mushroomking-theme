@@ -1,5 +1,7 @@
 <!-- Modal -->
 
+
+
 <div x-data="$store.adventureModal" x-show="isOpen" x-cloak class="fixed inset-0 bg-black/50 z-50 flex justify-center items-end w-full" style="height: calc(var(--vh, 1vh) * 100); padding-top: env(safe-area-inset-top);">
  <div
   @click.away="close()"
@@ -19,17 +21,7 @@
     </div>
     </div>
 
-    <!-- Toast -->
-    <div x-show="copied" class="absolute bottom-6 right-6 bg-black text-white px-3 py-2 rounded-md text-sm">Länk kopierad!</div>
-
-    <div
-      x-data
-      x-show="$store.adventureModal.saved"
-      x-transition.opacity.duration.400ms
-      class="fixed top-6 right-6 bg-green-600 text-white px-5 py-3 rounded-xl shadow-lg text-sm z-[9999]"
-    >
-      ✔️ Adventure saved!
-    </div>
+ 
 
   </div>
 </div>
