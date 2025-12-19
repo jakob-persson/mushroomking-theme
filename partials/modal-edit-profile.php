@@ -50,6 +50,44 @@ input {
   color: #1E2330 !important;
   background-color: #eff0ec!important
 }
+
+#profileAvatarPreview {
+    width: 8rem;           /* 32 * 0.25rem */
+    height: 8rem;          /* Make sure it's square */
+    object-fit: cover;     /* Crop image to cover the box */
+    border-radius: 9999px; /* Fully circular */
+    display: block;
+}
+
+.avatar-container {
+    width: 8rem;              /* 128px */
+    height: 8rem;             /* same as width */
+    position: relative;       /* so absolute child buttons are relative to it */
+}
+
+.avatar-camera-btn {
+    position: absolute;
+    bottom: 0.25rem;  /* 4px from bottom */
+    right: 0.25rem;   /* 4px from right */
+    width: 2rem;      /* 32px */
+    height: 2rem;     /* 32px */
+    border-radius: 9999px;
+    background-color: #1E2330;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.avatar-camera-btn:hover {
+    opacity: 1;
+}
+
+
+
 </style>
 
 
@@ -104,34 +142,21 @@ input {
             $user_country = get_user_meta($user_id, 'country', true);
         ?>
 
-        <div class="relative group">
-            <img
-                id="profileAvatarPreview"
-                src="<?= esc_url($current_user_avatar); ?>"
-                class="w-32 h-32 rounded-full object-cover border"
-                alt="Profile avatar"
-            >
+    <div class="avatar-container">
+    <img id="profileAvatarPreview" src="<?= esc_url($current_user_avatar); ?>" alt="Profile avatar">
 
-            <!-- Camera icon -->
-        <button
-            type="button"
-            onclick="document.getElementById('avatarFileInput').click()"
-            class="absolute bottom-2 right-1 w-8 h-8 rounded-full
-                bg-[#1E2330] text-white flex items-center justify-center
-                text-sm opacity-90 group-hover:opacity-100 transition"
-            title="Change profile image"
-        >
-            <i class="fas fa-camera"></i>
-        </button>
-
-        </div>
-        <input
-        type="file"
-        id="avatarFileInput"
-        accept="image/*"
-        class="hidden"
-        onchange="uploadAvatar(this)"
+    <button
+        type="button"
+        onclick="document.getElementById('avatarFileInput').click()"
+        class="avatar-camera-btn"
+        title="Change profile image"
     >
+        <i class="fas fa-camera"></i>
+        </button>
+    </div>
+
+    <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="uploadAvatar(this)">
+
 
         <div class="flex flex-col leading-tight">
             <span class="font-semibold text-sm mb-1">

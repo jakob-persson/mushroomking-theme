@@ -171,7 +171,7 @@
     <script>
       document.addEventListener('alpine:init', () => {
         Alpine.store('editProfileModal', {
-          isOpen: false
+          isOpen: true
         });
       });
       </script>
