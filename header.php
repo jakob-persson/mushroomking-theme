@@ -34,7 +34,7 @@
               close() { this.open = false; },
               openModal(data) {
                   this.adventure = data;
-                  this.open = false;
+                  this.open = true;
               }
           });
       });
@@ -171,7 +171,7 @@
     <script>
       document.addEventListener('alpine:init', () => {
         Alpine.store('editProfileModal', {
-          isOpen: true
+          isOpen: false
         });
       });
       </script>
