@@ -85,6 +85,68 @@ input {
 .avatar-camera-btn:hover {
     opacity: 1;
 }
+/* Modal-specific inputs */
+.edit input,
+.edit select,
+.edit textarea {
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.2;
+    min-height: 3.5rem;
+    padding: 1rem 1rem 0.2rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #ccc;
+    background-color: #eff0ec;
+    color: #1E2330;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Floating labels */
+.edit .relative label {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    font-size: 16px;
+    color: #888;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+/* When input/select/textarea has focus or value */
+.edit .relative input:focus + label,
+.edit .relative input:not(:placeholder-shown) + label,
+.edit .relative select:focus + label,
+.edit .relative select:not([value=""]) + label,
+.edit .relative textarea:focus + label {
+    top: 0.42rem;
+    font-size: 0.65rem;
+    color: #1E2330;
+    background: #eff0ec;
+    padding: 0 0;
+}
+
+/* Remove all glow/border shadows on focus */
+.edit input:focus,
+.edit select:focus,
+.edit textarea:focus {
+    border-color: #1E2330 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+     border: 2px solid #1E2330 !important;
+}
+
+/* Remove default browser arrows on select */
+.edit select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+
 
 
 
@@ -112,7 +174,7 @@ input {
   x-transition.opacity
   x-cloak
   @keydown.escape.window="$store.editProfileModal.isOpen = false"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 edit"
 >
 
   <div
@@ -194,84 +256,58 @@ input {
       <?php wp_nonce_field('edit_profile_action','edit_profile_nonce'); ?>
 
 
-      <div class="relative" x-data="{ hasValue: true }">
+     <div class="relative">
     <input
         type="text"
         name="display_name"
         required
+        placeholder=" "
         value="<?= esc_attr($current_user->display_name) ?>"
-        @input="hasValue = $event.target.value.length > 0"
-        @focus="hasValue = true"
-        class="peer w-full px-4 pt-6 pb-2 rounded-xl bg-[#eff0ec] border
-               focus:outline-none focus:ring-2 focus:ring-[#1E2330]"
+        class="peer w-full"
     />
+    <label>Display Name</label>
+</div>
 
-    <label
-        :class="hasValue
-            ? 'top-2 text-xs translate-y-0'
-            : 'top-1/2 -translate-y-1/2 text-sm'"
-        class="absolute left-4 text-gray-400 transition-all pointer-events-none">
-            Display Name
-        </label>
-    </div>
-
-
-<div class="relative" x-data="{ hasValue: true }">
+<div class="relative mt-4">
     <input
         type="email"
         name="email"
         required
+        placeholder=" "
         value="<?= esc_attr($current_user->user_email) ?>"
-        @input="hasValue = $event.target.value.length > 0"
-        @focus="hasValue = true"
-        class="peer w-full px-4 pt-6 pb-2 rounded-xl bg-[#eff0ec] border
-               focus:outline-none focus:ring-2 focus:ring-[#1E2330]"
+        class="peer w-full"
     />
+    <label>Email address</label>
+</div>
 
-    <label
-        :class="hasValue
-            ? 'top-2 text-xs translate-y-0'
-            : 'top-1/2 -translate-y-1/2 text-sm'"
-        class="absolute left-4 text-gray-400 transition-all pointer-events-none">
-        Email address
-        </label>
-    </div>
-
-
-    <div class="relative" x-data="{ hasValue: <?= $user_country ? 'true' : 'false' ?> }">
+<div class="relative" x-data="{ country: '<?= esc_js($user_country); ?>' }">
     <select
         name="country"
         required
-        @change="hasValue = $event.target.value !== ''"
-        @focus="hasValue = true"
+        x-model="country"
         class="peer w-full px-4 pt-6 pb-2 rounded-xl bg-[#eff0ec] border
                appearance-none focus:outline-none focus:ring-2 focus:ring-[#1E2330]">
-        
-        <option value="" disabled <?= !$user_country ? 'selected' : '' ?>></option>
-
-        <?php
+        <option value="" disabled></option>
+        <?php 
         $countries = ['United States','Canada','United Kingdom','Germany','France','India','Australia','Sweden','Norway','Finland','Other'];
-        foreach ($countries as $c) {
-            $selected = $user_country === $c ? 'selected' : '';
-            echo "<option value='".esc_attr($c)."' $selected>".esc_html($c)."</option>";
-        }
-        ?>
+        foreach ($countries as $c): ?>
+            <option value="<?= esc_attr($c); ?>"><?= esc_html($c); ?></option>
+        <?php endforeach; ?>
     </select>
 
-    <!-- Floating Label -->
     <label
-        :class="hasValue
-            ? 'top-2 text-xs translate-y-0'
-            : 'top-1/2 -translate-y-1/2 text-sm'"
+        :class="country ? 'top-2 text-xs translate-y-0' : 'top-1/2 -translate-y-1/2 text-sm'"
         class="absolute left-4 text-gray-400 transition-all pointer-events-none">
         Country
     </label>
 
-    <!-- Font Awesome chevron -->
     <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
         <i class="fas fa-chevron-down"></i>
     </span>
 </div>
+
+
+
 
 
 
