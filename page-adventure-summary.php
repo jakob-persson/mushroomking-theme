@@ -227,15 +227,13 @@ $user_data = get_userdata($hunt->user_id ?? 0);
                         dark">    
                 <button
                     @click="$store.adventureModal.close()"
-                    class="
-                         ml-3 w-10 h-10 flex items-center justify-center
-                        dark"
+                    class="ml-3 w-10 h-10 flex items-center justify-center dark"
                 >
                     <i class="fas fa-chevron-left text-lg"></i>
                 </button>
             </div>
             <!-- HEADER -->
-            <div class="flex space-between w-full pt-6 lg:pt-0"> 
+            <div class="flex space-between w-full pt-4 lg:pt-0"> 
               <?php 
                 $avatar = mk_get_user_avatar($hunt->user_id);
                 $username = get_userdata($hunt->user_id)->display_name;

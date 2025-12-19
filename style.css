@@ -103,7 +103,8 @@ body {
 /* Base input style */
 input {
   color: #1E2330 !important;
-  background-color: red!important
+  background-color: #eff0ec!important
+ 
 }
 
 /* Remove Chrome autofill yellow */
