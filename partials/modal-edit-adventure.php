@@ -34,9 +34,7 @@
         <!-- User info -->
         <div class="px-6 flex items-center space-x-3 my-4">
             <?php $current_user_avatar = mk_get_user_avatar(get_current_user_id()); ?>
-<img src="<?= esc_url($current_user_avatar); ?>" class="w-12 h-12 rounded-full object-cover">
-
-
+            <img src="<?= esc_url($current_user_avatar); ?>" class="w-12 h-12 rounded-full object-cover">
             <div class="flex flex-col leading-tight">
                 <span class="font-semibold text-sm mb-1" x-text="$store.editAdventureModal.adventure.username"></span>
                 <span class="text-sm flex items-center gap-3">

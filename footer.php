@@ -132,6 +132,8 @@ if (
 
 
 <?php endif; // end skip check ?>
+<?php get_template_part('partials/modal', 'edit-profile'); ?>
+
 
 </body>
 </html>

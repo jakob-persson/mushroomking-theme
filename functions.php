@@ -523,3 +523,44 @@ function mk_delete_adventure() {
 }
 
 
+add_action('wp_ajax_upload_profile_avatar', 'upload_profile_avatar');
+
+function upload_profile_avatar() {
+
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not logged in');
+    }
+
+    if (empty($_FILES['avatar'])) {
+        wp_send_json_error('No file');
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    $upload = wp_handle_upload($_FILES['avatar'], ['test_form' => false]);
+
+    if (isset($upload['error'])) {
+        wp_send_json_error($upload['error']);
+    }
+
+    $filetype = wp_check_filetype($upload['file']);
+    $attachment = [
+        'post_mime_type' => $filetype['type'],
+        'post_title'     => basename($upload['file']),
+        'post_status'    => 'inherit'
+    ];
+
+    $attach_id = wp_insert_attachment($attachment, $upload['file']);
+    $attach_data = wp_generate_attachment_metadata($attach_id, $upload['file']);
+    wp_update_attachment_metadata($attach_id, $attach_data);
+
+    update_user_meta(get_current_user_id(), 'profile_avatar', $attach_id);
+
+    wp_send_json_success([
+        'avatar_id' => $attach_id
+    ]);
+}
+
+
+

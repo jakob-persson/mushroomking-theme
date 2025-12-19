@@ -102,8 +102,8 @@ body {
 }
 /* Base input style */
 input {
-  background-color: #F6F7F5 !important;
   color: #1E2330 !important;
+  background-color: red!important
 }
 
 /* Remove Chrome autofill yellow */
@@ -119,7 +119,7 @@ input:-webkit-autofill:focus {
 /* Remove Firefox autofill background */
 input:autofill,
 textarea:autofill {
-  background-color: #F6F7F5 !important;
+ 
   color: #1E2330 !important;
 }
 

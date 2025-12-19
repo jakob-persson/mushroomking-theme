@@ -27,18 +27,17 @@
       <?php wp_head(); ?>
     </head>
     <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.store('editAdventureModal', {
-        adventure: {},
-        open: false,
-        close() { this.open = false; },
-        openModal(data) {
-            this.adventure = data;
-            this.open = true;
-        }
-    });
-});
-
+      document.addEventListener('alpine:init', () => {
+          Alpine.store('editAdventureModal', {
+              adventure: {},
+              open: false,
+              close() { this.open = false; },
+              openModal(data) {
+                  this.adventure = data;
+                  this.open = true;
+              }
+          });
+      });
 </script>
 
 
@@ -169,6 +168,13 @@ document.addEventListener('alpine:init', () => {
         });
       });
     </script>
+    <script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.store('editProfileModal', {
+          isOpen: false
+        });
+      });
+      </script>
       <?php
       // Check if current page uses the adventure summary template
       $is_adventure_template = function_exists('is_page_template') ? is_page_template('page-adventure-summary.php') : false;
@@ -458,9 +464,9 @@ if ( is_front_page() && is_user_logged_in() ) {
                   <button @click="open = !open" class="relative w-10 h-10 focus:outline-none">
                       <!-- Avatar -->
                       <?php
-$avatar_url = mk_get_user_avatar($user_id);
-?>
-<img src="<?php echo esc_url($avatar_url); ?>" class="w-10 h-10 rounded-full object-cover">
+                        $avatar_url = mk_get_user_avatar($user_id);
+                        ?>
+                        <img src="<?php echo esc_url($avatar_url); ?>" class="w-10 h-10 rounded-full object-cover">
 
 
                       <!-- Yellow chevron badge -->
@@ -490,9 +496,12 @@ $avatar_url = mk_get_user_avatar($user_id);
                       <div class="py-2">
                           <a href="/settings" class="block px-4 py-2 dark hover:bg-gray-100">Settings</a>
                           <?php if (is_user_logged_in() && get_current_user_id() === $user->ID): ?>
-                              <a href="<?= home_url('/edit-profile/') ?>" class="block px-4 py-2 dark hover:bg-gray-100">
-                                  Edit Profile
-                              </a>
+                              <button
+                                @click="$store.editProfileModal.isOpen = true"
+                                class="px-4 py-2 rounded-xl bg-black text-white"
+                              >
+                                Edit Profile
+                              </button>
                           <?php endif; ?>
                           <a href="<?php echo wp_logout_url(home_url('/')); ?>"
                             class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>

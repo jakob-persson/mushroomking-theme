@@ -286,7 +286,7 @@ document.addEventListener('alpine:init', () => {
             </div>    
         </div>
         <!-- Actions -->
-          <div class="absolute top-4 right-4" x-data="{ open: true }">
+          <div class="absolute top-5 right-4" x-data="{ open: false }">
 
               <!-- More button -->
               <button
