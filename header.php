@@ -34,7 +34,7 @@
               close() { this.open = false; },
               openModal(data) {
                   this.adventure = data;
-                  this.open = true;
+                  this.open = false;
               }
           });
       });
