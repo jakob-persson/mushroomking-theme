@@ -136,7 +136,6 @@ input {
     box-shadow: none !important;
     -webkit-box-shadow: none !important;
     -moz-box-shadow: none !important;
-     border: 2px solid #1E2330 !important;
 }
 
 /* Remove default browser arrows on select */
@@ -280,30 +279,44 @@ input {
     <label>Email address</label>
 </div>
 
-<div class="relative" x-data="{ country: '<?= esc_js($user_country); ?>' }">
-    <select
-        name="country"
-        required
+<div class="relative mt-4" x-data="{
+        country: '<?= esc_js($user_country); ?>',
+        countries: ['Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo (Congo-Brazzaville)','Costa Rica','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Holy See','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine State','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States of America','Uruguay','Uzbekistan','Vanuatu','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'],
+        filtered: [],
+        open: false,
+        cleared: false,
+        selectCountry(c) { this.country = c; this.open = false; },
+        clearOnFocus() { if(!this.cleared) { this.country = ''; this.cleared = true; } }
+    }">
+    
+    <input 
+        type="text" 
+        name="country" 
+        placeholder="Start typing your country..." 
+        autocomplete="off"
         x-model="country"
-        class="peer w-full px-4 pt-6 pb-2 rounded-xl bg-[#eff0ec] border
-               appearance-none focus:outline-none focus:ring-2 focus:ring-[#1E2330]">
-        <option value="" disabled></option>
-        <?php 
-        $countries = ['United States','Canada','United Kingdom','Germany','France','India','Australia','Sweden','Norway','Finland','Other'];
-        foreach ($countries as $c): ?>
-            <option value="<?= esc_attr($c); ?>"><?= esc_html($c); ?></option>
-        <?php endforeach; ?>
-    </select>
-
-    <label
-        :class="country ? 'top-2 text-xs translate-y-0' : 'top-1/2 -translate-y-1/2 text-sm'"
-        class="absolute left-4 text-gray-400 transition-all pointer-events-none">
+        @focus="clearOnFocus(); filtered = countries; open = true"
+        @input="filtered = countries.filter(c => c.toLowerCase().includes(country.toLowerCase())); open = filtered.length>0"
+        class="peer w-full px-4 py-3 rounded-xl bg-[#eff0ec] border focus:border-[#1E2330] focus:outline-none"
+    >
+    <label class="absolute left-4 top-1 text-gray-400 text-sm pointer-events-none transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500">
         Country
     </label>
 
-    <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-        <i class="fas fa-chevron-down"></i>
-    </span>
+    <ul 
+        x-show="open" 
+        @click.away="open = false" 
+        class="absolute left-0 top-full z-50 w-full max-h-40 overflow-y-auto bg-white border rounded-xl mt-1 shadow"
+    >
+        <template x-for="c in filtered" :key="c">
+            <li 
+                @click="selectCountry(c)" 
+                class="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                x-text="c"
+            ></li>
+        </template>
+        <li x-show="filtered.length === 0" class="px-4 py-2 text-gray-400 cursor-default">No results</li>
+    </ul>
 </div>
 
 

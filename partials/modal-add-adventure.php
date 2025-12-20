@@ -42,6 +42,7 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
 </style>
 <div 
     x-data="adventureModal()"
@@ -184,7 +185,7 @@
                             />
 
                             <!-- kg INSIDE input -->
-                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                            <span class="safari-margin-right absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
                                 kg
                             </span>
                         </div>
