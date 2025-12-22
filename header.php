@@ -187,9 +187,9 @@
       $extra_classes = '';
 
      // Front page AND user logged in → add custom class
-if ( is_front_page() && is_user_logged_in() ) {
-    $extra_classes .= ' logged-in-frontpage bg-[#EFF0EC]';
-}
+      if ( is_front_page() && is_user_logged_in() ) {
+          $extra_classes .= ' logged-in-frontpage bg-[#EFF0EC]';
+      }
       // Page templates / other conditions
       elseif ( is_page_template('page-login.php') ) {
           $extra_classes .= '';
@@ -226,12 +226,7 @@ if ( is_front_page() && is_user_logged_in() ) {
       class=" relative z-10"
     >
 
-      <!-- ✅ Sticky Header -->
-      <div
-  x-data="{ isSticky: false }"
-  x-init="window.addEventListener('scroll', () => { isSticky = window.scrollY > 200 })"
-  class="relative z-10"
->
+ 
   <!-- ✅ Sticky Header -->
   <div :class="isSticky ? 'fixed top-0 left-0 right-0 z-50' : 'z-50'"
      class="transition-all duration-300 lg:pt-4">

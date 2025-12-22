@@ -11,8 +11,19 @@
 // });
 
 function jsp_enqueue_assets() {
+
     wp_enqueue_style('fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
-    wp_enqueue_style('jsp-style', get_stylesheet_uri());
+
+    wp_enqueue_style(
+        'jsp-style',
+        get_stylesheet_uri(),
+        [],
+        filemtime(get_stylesheet_directory() . '/style.css')
+    );
+
+
+add_action('wp_enqueue_scripts', 'jsp_enqueue_assets');
+
 
     wp_enqueue_script(
         'alpine',
@@ -382,7 +393,6 @@ add_filter('retrieve_password_message', function($message, $key, $user_login, $u
 
     return $message;
 }, 10, 4);
-wp_enqueue_style('theme-custom', get_template_directory_uri() . '/style.css', array('tailwind'), '1.0');
 
 
 function mk_enable_frontend_editor() {

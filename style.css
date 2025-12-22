@@ -137,7 +137,6 @@ textarea:focus {
 
 
 
-
 /* .fb-profile-wrapper {
     position: relative;
     width: 100%;
@@ -184,17 +183,19 @@ textarea:focus {
 }
 
 
-body.logged-in-frontpage {
-    overflow: hidden !important; /* Disable page scroll */
-}
+@media (min-width: 1024px) {
+    body.logged-in-frontpage {
+        overflow: hidden !important;
+    }
 
-body.logged-in-frontpage .adventure-feed {
-    overflow-y: auto; /* Scrollable right column only */
-    height: 100vh;
-}
+    body.logged-in-frontpage .adventure-feed {
+        overflow-y: auto; 
+        min-height: 100vh;
+    }
 
-body.logged-in-frontpage .left-column {
-    position: sticky;
-    top: 0;
-    height: 100vh;
+    body.logged-in-frontpage .left-column {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
 }
