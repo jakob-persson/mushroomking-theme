@@ -250,7 +250,7 @@
         </div>
 
 
-            <div class="flex items-center space-x-4 lg:space-x-6">
+            <div class="flex items-center space-x-2 lg:space-x-4 lg:space-x-6">
                <!-- Desktop Find Foragers -->
                <?php if ( is_user_logged_in() ): ?>
                 <div x-data="userSearch()" class="relative max-w-5xl mx-auto hidden lg:block">
@@ -513,7 +513,7 @@
                         <!-- Toggle Button -->
                         <button
                             @click="open = !open"
-                            class="py-2 rounded-md relative z-50"
+                            class="px-2 rounded-md relative z-50"
                             :class="open ? 'bg-[#CEE027] fixed' : ''"
                           >
                             <!-- Hamburger -->
