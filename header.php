@@ -398,7 +398,7 @@
                 <!-- Logged-in user: Show Add Adventure button -->
                 <button
                   @click="$store.modal.isOpen = true"
-                  class="lg:flex items-center gap-2 bg-[#eff0ec] text-[#111827] px-5 py-4 rounded-xl font-medium text-sm"
+                  class="lg:flex items-center gap-2 bg-[#eff0ec] text-[#111827] px-4 py-4 rounded-xl font-medium text-sm"
                 >
                 <svg class="w-4 w-4" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                      viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
@@ -417,7 +417,7 @@
                 <!-- Guest user: Show Create Account button -->
                 <a
                   href="mk/register"
-                  class="hover:opacity-90 items-center gap-2 bg-[#eff0ec] text-[#111827] px-5 py-4 rounded-xl font-medium text-xs lg:text-sm"
+                  class="hover:opacity-90 items-center gap-2 bg-[#eff0ec] text-[#111827] px-4 py-4 rounded-xl font-medium text-xs lg:text-sm"
                 >
                   <span>Create Account</span>
                 </a>
@@ -436,7 +436,7 @@
               <!-- Not logged in: Show Login button -->
               <a
                 href="mk/login"
-                class="hover:opacity-90 lg:flex items-center gap-2 bg-[#111827] text-white px-5 py-4 rounded-full font-medium text-xs lg:text-sm"
+                class="hover:opacity-90 lg:flex items-center gap-2 bg-[#111827] text-white px-4 py-4 rounded-full font-medium text-xs lg:text-sm"
               >
                 <span>Log in</span>
               </a>
