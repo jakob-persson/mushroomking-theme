@@ -417,7 +417,7 @@
                 <!-- Guest user: Show Create Account button -->
                 <a
                   href="mk/register"
-                  class="hover:opacity-90 hidden lg:flex items-center gap-2 bg-[#eff0ec] text-[#111827] px-5 py-4 rounded-xl font-medium text-sm"
+                  class="hover:opacity-90 items-center gap-2 bg-[#eff0ec] text-[#111827] px-5 py-4 rounded-xl font-medium text-xs lg:text-sm"
                 >
                   <span>Create Account</span>
                 </a>
@@ -436,7 +436,7 @@
               <!-- Not logged in: Show Login button -->
               <a
                 href="mk/login"
-                class="hover:opacity-90 lg:flex items-center gap-2 bg-[#CEE027] text-[#111827] px-5 py-4 rounded-full font-medium text-sm"
+                class="hover:opacity-90 lg:flex items-center gap-2 bg-[#111827] text-white px-5 py-4 rounded-full font-medium text-xs lg:text-sm"
               >
                 <span>Log in</span>
               </a>
@@ -513,7 +513,7 @@
                         <!-- Toggle Button -->
                         <button
                             @click="open = !open"
-                            class="p-2 rounded-md relative z-50"
+                            class="py-2 rounded-md relative z-50"
                             :class="open ? 'bg-[#CEE027] fixed' : ''"
                           >
                             <!-- Hamburger -->
