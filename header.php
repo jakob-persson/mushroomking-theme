@@ -235,7 +235,7 @@
 
         <!-- Left Side: Logo + Nav -->
         <div class="flex items-center">
-          <div class="w-[42px] lg:w-[62px] lg:border-r lg:border-[#111827] lg:pr-4">
+          <div class="w-[34px] lg:w-[62px] lg:border-r lg:border-[#111827] lg:pr-4">
             <a href="<?php echo home_url(); ?>">
               <img src="<?php echo get_template_directory_uri(); ?>/images/mk-logo2.png" alt="Logo">
             </a>
