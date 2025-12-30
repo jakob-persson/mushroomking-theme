@@ -565,7 +565,7 @@ function upload_profile_avatar() {
     $attach_data = wp_generate_attachment_metadata($attach_id, $upload['file']);
     wp_update_attachment_metadata($attach_id, $attach_data);
 
-    update_user_meta(get_current_user_id(), 'profile_avatar', $attach_id);
+    update_user_meta(get_current_user_id(), 'profile_image', $attach_id);
 
     wp_send_json_success([
         'avatar_id' => $attach_id
