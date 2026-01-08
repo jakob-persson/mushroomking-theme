@@ -195,7 +195,7 @@ document.addEventListener('alpine:init', () => {
             <!-- Avatar + Name -->
             <div class="flex items-center gap-4 mb-4">
                 <img src="<?= esc_url($avatar); ?>" 
-                    class="w-16 h-16 rounded-full object-cover shadow-md">
+                    class="w-16 h-16 rounded-full object-cover shadow-md shrink-0">
 
                 <div>
                     <div class="text-lg font-semibold dark leading-tight">

@@ -256,7 +256,7 @@
                 </div>
 
 
-                <div class="flex items-center space-x-3 lg:space-x-4 lg:space-x-6">
+                <div class="flex items-center space-x-2.5 lg:space-x-4 lg:space-x-6">
                   <!-- Desktop Find Foragers -->
                   <?php if (is_user_logged_in()): ?>
                     <div x-data="userSearch()" class="relative max-w-5xl mx-auto hidden lg:block">
