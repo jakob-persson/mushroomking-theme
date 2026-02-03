@@ -363,12 +363,9 @@ $mushroom_icons = [
   <!-- Large profile image -->
   <div class="flex-none lg:flex-1 flex justify-center items-center mt-4 lg:mt-0">
     <div id="tilt-container" class="relative perspective-[1000px] mt-[0px]">
-
-      <?php
-      // Get profile image meta - support attachment ID or legacy URL
+        
+   <?php
       $meta_profile = get_user_meta($user->ID, 'profile_image', true);
-
-      // If meta is empty, maybe we stored a URL previously in profile_image_url
       if (empty($meta_profile)) {
         $meta_profile = get_user_meta($user->ID, 'profile_image_url', true);
       }
@@ -377,61 +374,76 @@ $mushroom_icons = [
       $has_image = false;
 
       if ($meta_profile) {
-        // If numeric -> treat as attachment ID
         if (is_numeric($meta_profile)) {
-          $maybe_url = wp_get_attachment_url(intval($meta_profile));
+          $maybe_url = wp_get_attachment_url((int)$meta_profile);
           if ($maybe_url) {
             $profile_img_url = $maybe_url;
             $has_image = true;
-          } else {
-            // fallback: if stored as ID but not found, leave as default
-            $has_image = false;
           }
         } elseif (filter_var($meta_profile, FILTER_VALIDATE_URL)) {
-          // stored url
           $profile_img_url = $meta_profile;
           $has_image = true;
         }
       }
 
-      if (!$has_image) {
-        $profile_img_url = get_template_directory_uri() . '/images/default-profile-fb.png';
-        $has_image = false;
-      }
+      // fallback image (om du vill ha en riktig default-bild istället för “no image”)
+      $fallback_img = get_template_directory_uri() . '/images/default-profile-fb.png';
+
+      // alltid ha en src
+      $profile_img_url = $has_image ? $profile_img_url : $fallback_img;
+
+      // ✅ debug efter att $has_image är satt
+      $debug_no_image   = isset($_GET['debug']) && $_GET['debug'] === '1';
+      $show_placeholder = !$has_image || $debug_no_image;
       ?>
 
-      <div class="fb-profile-wrapper relative w-full h-full">
-
-        <?php if (!$has_image): ?>
-          <!-- Placeholder (FB-like) -->
-          <div id="profile-placeholder" class="fb-placeholder">
-            <div class="fb-camera-center">
-              <i class="fas fa-camera"></i>
-            </div>
-          </div>
-        <?php endif; ?>
-
-        <!-- ALWAYS present preview -->
-
-        <img id="profile-preview-img"
-          src="<?= esc_url($profile_img_url); ?>"
-          alt="<?= esc_attr($user->display_name); ?>'s profile picture"
-          class="px-4 lg:px-0 w-[720px] max-w-full rounded-[150px] h-[220px] lg:h-[400px] object-cover lg:rounded-[150px] drop-shadow-xl transition-transform duration-150 ease-out">
 
 
-        <!-- Camera badge (only if logged in as the same user) -->
-        <?php if (is_user_logged_in() && get_current_user_id() == $user->ID): ?>
-          <div id="profile-camera-badge" class="fb-camera-badge" style="<?= $has_image ? 'display:flex;' : 'display:none;' ?>">
-            <i class="fas fa-camera"></i>
-          </div>
+     <div class="fb-profile-wrapper relative w-full h-full">
 
-          <!-- REAL upload field -->
-          <form method="post" enctype="multipart/form-data">
-            <input type="file" name="profile_image_upload" id="profile_image_upload" class="hidden" accept="image/*">
-          </form>
-        <?php endif; ?>
-
+  <?php if ($show_placeholder): ?>
+    <!-- Placeholder -->
+    <div
+      id="profile-placeholder"
+      class="absolute inset-0 flex items-center justify-center rounded-[150px] bg-white/70 border border-black/10 z-10">
+      <div class="flex flex-col items-center gap-2 text-[#111827]/70">
+        <i class="fas fa-image text-3xl"></i>
+        <span class="text-sm font-medium">Add profile image</span>
       </div>
+    </div>
+  <?php endif; ?>
+
+  <!-- Profile image (alltid i DOM) -->
+  <img
+    id="profile-preview-img"
+    src="<?= esc_url($profile_img_url); ?>"
+    alt="<?= esc_attr($user->display_name); ?> profile picture"
+    class="px-4 lg:px-0 w-[720px] max-w-full rounded-[150px] h-[220px] lg:h-[400px] object-cover drop-shadow-xl transition-opacity duration-150
+      <?= ($show_placeholder && $debug_no_image) ? 'opacity-0' : 'opacity-100' ?>"
+  >
+
+  <?php if (is_user_logged_in() && get_current_user_id() == $user->ID): ?>
+    <!-- Kamera-badge -->
+    <div
+      id="profile-camera-badge"
+      class="fb-camera-badge"
+      style="<?= $has_image && !$debug_no_image ? 'display:flex;' : 'display:none;' ?>">
+      <i class="fas fa-camera"></i>
+    </div>
+
+    <!-- Upload -->
+    <form method="post" enctype="multipart/form-data">
+      <input
+        type="file"
+        name="profile_image_upload"
+        id="profile_image_upload"
+        class="hidden"
+        accept="image/*">
+    </form>
+  <?php endif; ?>
+
+</div>
+
 
 
       <!-- Badge Overlay -->
