@@ -54,7 +54,7 @@ wp_enqueue_script(
   );
 
 
-
+  add_image_size('feed_card', 900, 900, true);
   add_action('wp_ajax_add_mushroom', 'my_add_mushroom_function');
   add_action('wp_ajax_nopriv_add_mushroom', 'my_add_mushroom_function');
 
@@ -573,4 +573,246 @@ function upload_profile_avatar() {
 }
 
 
+// Feed: hämta en optimerad bild-URL (thumbnail) från attachment ID eller URL
+if (!function_exists('mk_image_url_for_size')) {
+  function mk_image_url_for_size($value, $size = 'feed_card') {
+    if (!$value) return '';
 
+    // 1) attachment-id direkt
+    if (is_numeric($value)) {
+      $src = wp_get_attachment_image_src((int)$value, $size);
+      return $src[0] ?? '';
+    }
+
+    // 2) JSON-array (om värdet råkar vara JSON)
+    if (is_string($value) && substr(trim($value), 0, 1) === '[') {
+      $arr = json_decode($value, true);
+      if (json_last_error() === JSON_ERROR_NONE && is_array($arr) && !empty($arr)) {
+        return mk_image_url_for_size($arr[0], $size);
+      }
+    }
+
+    // 3) URL -> försök hitta attachment id i Media Library
+    if (is_string($value) && filter_var($value, FILTER_VALIDATE_URL)) {
+      $att_id = attachment_url_to_postid($value);
+      if ($att_id) {
+        $src = wp_get_attachment_image_src((int)$att_id, $size);
+        if (!empty($src[0])) return $src[0];
+      }
+      return $value; // fallback (extern eller ej hittad)
+    }
+
+    return '';
+  }
+}
+add_action('after_setup_theme', function () {
+  add_image_size('feed_card', 900, 900, true);
+});
+
+
+add_action('wp_ajax_mk_load_more_hunts', 'mk_load_more_hunts');
+add_action('wp_ajax_nopriv_mk_load_more_hunts', 'mk_load_more_hunts');
+
+function mk_load_more_hunts() {
+  // (Valfritt) om du bara vill tillåta inloggade:
+  if (!is_user_logged_in()) {
+    wp_send_json_error(['message' => 'Not logged in'], 403);
+  }
+
+  // Nonce
+  $nonce = isset($_POST['_ajax_nonce']) ? sanitize_text_field($_POST['_ajax_nonce']) : '';
+  if (!wp_verify_nonce($nonce, 'mk_load_more_hunts')) {
+    wp_send_json_error(['message' => 'Bad nonce'], 403);
+  }
+
+  $offset = isset($_POST['offset']) ? max(0, intval($_POST['offset'])) : 0;
+  $limit  = isset($_POST['limit']) ? intval($_POST['limit']) : 5;
+
+  // skydda servern
+  if ($limit < 1) $limit = 5;
+  if ($limit > 20) $limit = 20;
+
+  global $wpdb;
+
+  // Viktigt: prepare med %d funkar här
+  $rows = $wpdb->get_results(
+    $wpdb->prepare(
+      "SELECT * FROM {$wpdb->prefix}mushrooms
+       ORDER BY start_date DESC
+       LIMIT %d OFFSET %d",
+      $limit,
+      $offset
+    )
+  );
+
+  if (!$rows) {
+    wp_send_json_success([
+      'html' => '',
+      'count' => 0,
+    ]);
+  }
+
+  // Rendera HTML på serversidan (så du slipper duplicera markup i JS)
+  ob_start();
+  foreach ($rows as $hunt) {
+    mk_render_feed_card($hunt);
+  }
+  $html = ob_get_clean();
+
+  wp_send_json_success([
+    'html'  => $html,
+    'count' => count($rows),
+  ]);
+}
+
+/**
+ * Renderar exakt samma feed-card markup som på front-page.
+ * Du kan justera klasser här och de gäller både initial load och infinite scroll.
+ */
+function mk_render_feed_card($hunt) {
+    $user_id = intval($hunt->user_id ?? 0);
+    $user = $user_id ? get_user_by('id', $user_id) : null;
+
+    $username = $user ? $user->display_name : 'Unknown';
+    $avatar   = mk_get_user_avatar($user_id);
+
+    $profile_url = $user
+    ? home_url('/' . $user->user_nicename)
+    : '#';
+
+  $user_id = intval($hunt->user_id);
+  $user    = get_user_by('id', $user_id);
+  $username = $user ? $user->display_name : 'Unknown';
+  $avatar  = function_exists('mk_get_user_avatar') ? mk_get_user_avatar($user_id) : get_avatar_url($user_id);
+
+  // Foto-array
+  $photos = json_decode($hunt->photo_url, true);
+  if (!$photos || !is_array($photos)) {
+    $photos = [$hunt->photo_url ?: get_template_directory_uri() . "/images/placeholder.png"];
+  }
+
+  $first_photo = $photos[0] ?? null;
+
+  // Thumbnail för feed-kort
+  $feed_photo = function_exists('mk_image_url_for_size')
+    ? mk_image_url_for_size($first_photo, 'feed_card')
+    : ($first_photo ?: get_template_directory_uri() . "/images/placeholder.png");
+
+  if (!$feed_photo) {
+    $feed_photo = get_template_directory_uri() . "/images/placeholder.png";
+  }
+
+  $weight = rtrim(rtrim(number_format((float)$hunt->kilograms, 2, ',', ''), '0'), ',');
+
+  // Objekt för modalen – behåll originalbilder i "photos"
+  $hunt_object = [
+    'id'             => intval($hunt->id),
+    'photos'         => $photos,
+    'photo'          => $first_photo,
+    'location'       => $hunt->location,
+    'date'           => $hunt->start_date,
+    'username'       => $username,
+    'user_id'        => $hunt->user_id,
+    'total_kg'       => floatval($hunt->kilograms ?? 0),
+    'type'           => $hunt->type ?? '{}',
+    'adventure_text' => $hunt->adventure_text ?? '',
+  ];
+  ?>
+  <div
+    class="relative bg-white rounded-[30px] overflow-hidden shadow-sm cursor-pointer ml-[1px] feed-card"
+    style="width: calc(100% - 11px); aspect-ratio: 1 / 1;"
+    @click='$store.adventureModal.open(<?= json_encode($hunt_object, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'
+  >
+    <img
+      src="<?= esc_url($feed_photo); ?>"
+      loading="lazy"
+      decoding="async"
+      class="absolute inset-0 w-full h-full object-cover"
+      alt=""
+    >
+
+    <div class="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-black/60 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+    <?php $is_owner = is_user_logged_in() && ((int)get_current_user_id() === (int)$hunt->user_id);
+        ?>
+
+        <!-- Actions (3 dots) -->
+        <div class="absolute top-5 right-4" x-data="{ open: false }" @click.stop>
+        <!-- More button -->
+        <button
+            @click.stop="open = !open"
+            :class="open ? 'bg-white dark shadow-md text-black' : 'bg-transparent text-white'"
+            class="w-10 h-10 rounded-full flex items-center justify-center transition"
+            type="button"
+        >
+            <i class="fas fa-ellipsis-h text-xl"></i>
+        </button>
+
+        <!-- Dropdown -->
+        <div
+            x-show="open"
+            x-transition
+            @click.away="open = false"
+            class="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg z-50 p-4"
+        >
+            <?php if ($is_owner): ?>
+            <!-- Edit -->
+            <button
+                type="button"
+                data-hunt='<?= htmlspecialchars(json_encode($hunt_object), ENT_QUOTES, 'UTF-8') ?>'
+                @click.stop="
+                $store.editAdventureModal.adventure = JSON.parse($el.dataset.hunt);
+                open = false;
+                $nextTick(() => $store.editAdventureModal.open = true);
+                "
+                class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm dark hover:bg-[#eff0ec] rounded-md"
+            >
+                <i class="fas fa-pen w-4"></i>
+                <span>Edit adventure</span>
+            </button>
+
+            <!-- Delete -->
+            <button
+                type="button"
+                @click.stop="
+                open = false;
+                if (confirm('Are you sure you want to delete this adventure? This cannot be undone.')) {
+                    deleteAdventure(<?= intval($hunt->id); ?>);
+                }
+                "
+                class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm dark hover:bg-[#eff0ec] rounded-md"
+            >
+                <i class="fas fa-trash-alt w-4"></i>
+                <span>Delete</span>
+            </button>
+            <?php else: ?>
+            <div class="text-sm text-gray-500">No actions available.</div>
+            <?php endif; ?>
+        </div>
+        </div>
+
+
+      <a
+        href="<?= esc_url($profile_url); ?>"
+        class="absolute top-4 left-4 flex items-center gap-3 z-20 w-[50%] hover:opacity-90 transition"
+        @click.stop
+        >
+        <img src="<?= esc_url($avatar); ?>" class="w-10 h-10 rounded-full object-cover">
+        <span class="text-white text-sm"><?= esc_html($username); ?></span>
+        </a>
+
+
+    <div class="absolute bottom-4 lg:bottom-6 left-6 right-6 rounded-[30px] pb-6 flex justify-between items-start z-30">
+      <div class="max-w-[100%] flex flex-col">
+        <div class="text-white text-2xl gilroy" style="line-height:18px"><?= esc_html($hunt->location); ?></div>
+        <div class="text-white">
+          <span class="font-regular text-xs"><?= esc_html($hunt->start_date); ?> • <?= esc_html($weight); ?>kg</span>
+        </div>
+        <div class="text-white font-regular text-sm leading-snug mt-1">
+          <?= esc_html(wp_trim_words($hunt->adventure_text, 15)); ?>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php
+}

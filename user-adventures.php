@@ -1,48 +1,155 @@
 <?php
-
 /**
  * Template Name: User Adventures
  */
 
 global $wpdb;
 
-if (! function_exists('media_handle_upload')) {
-  require_once(ABSPATH . 'wp-admin/includes/image.php');
-  require_once(ABSPATH . 'wp-admin/includes/file.php');
-  require_once(ABSPATH . 'wp-admin/includes/media.php');
+/**
+ * Stoppa cache på profilsidor (hjälper enormt om du har cache-plugin / servercache).
+ * OBS: gör detta innan output.
+ */
+if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+if (!defined('DONOTCACHEDB')) define('DONOTCACHEDB', true);
+if (!defined('DONOTCACHEOBJECT')) define('DONOTCACHEOBJECT', true);
+
+/**
+ * Hämta profilens "ägare" tidigt (innan handlers) så vi kan:
+ *  - veta vilken user page det är
+ *  - kontrollera behörighet
+ *  - redirecta till rätt URL efter save
+ */
+$username = get_query_var('mk_user');
+
+if (!$username) {
+  wp_safe_redirect(home_url('/login'));
+  exit;
 }
 
-// -------------------------
-// HANDLE PROFILE UPLOAD
-// -------------------------
-// Must run before any output (so redirect works)
-if (isset($_FILES['profile_image_upload']) && is_user_logged_in()) {
+$user = get_user_by('slug', $username);
+if (!$user) {
+  wp_safe_redirect(home_url('/login'));
+  exit;
+}
 
-  // Load required WP media libraries
+$profile_user_id = (int) $user->ID;
+$is_owner = is_user_logged_in() && ((int) get_current_user_id() === $profile_user_id);
+
+/**
+ * Säker helper: redirecta till samma profilsida men med cache-buster.
+ */
+function mk_redirect_self_with_ts() {
+  $url = (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+  // ta bort gamla flaggor om de finns
+  $url = remove_query_arg(['profile_updated', '_ts'], $url);
+
+  // lägg på nya
+  $url = add_query_arg([
+    'profile_updated' => '1',
+    '_ts' => time(),
+  ], $url);
+
+  wp_safe_redirect($url);
+  exit;
+}
+
+/**
+ * =========================================
+ * HANDLE EDIT PROFILE SAVE (från din modal)
+ * =========================================
+ * Kräver att:
+ *  - man är inloggad
+ *  - man editerar sin egen sida
+ *  - nonce är giltig
+ */
+if (
+  $is_owner &&
+  isset($_POST['edit_profile_nonce']) &&
+  wp_verify_nonce($_POST['edit_profile_nonce'], 'edit_profile_action')
+) {
+  $user_id = get_current_user_id();
+
+  // display name
+  if (isset($_POST['display_name'])) {
+    $display_name = sanitize_text_field($_POST['display_name']);
+    if ($display_name !== '') {
+      $res = wp_update_user([
+        'ID' => $user_id,
+        'display_name' => $display_name,
+      ]);
+      if (is_wp_error($res)) {
+        // valfritt: logga felet
+        error_log('wp_update_user display_name error: ' . $res->get_error_message());
+      }
+    }
+  }
+
+  // email
+  if (isset($_POST['email'])) {
+    $email = sanitize_email($_POST['email']);
+    if ($email !== '') {
+      $res = wp_update_user([
+        'ID' => $user_id,
+        'user_email' => $email,
+      ]);
+      if (is_wp_error($res)) {
+        error_log('wp_update_user email error: ' . $res->get_error_message());
+      }
+    }
+  }
+
+  // country meta
+  if (isset($_POST['country'])) {
+    update_user_meta($user_id, 'country', sanitize_text_field($_POST['country']));
+  }
+
+  // presentation meta
+  if (isset($_POST['presentation'])) {
+    update_user_meta($user_id, 'presentation', sanitize_textarea_field($_POST['presentation']));
+  }
+
+  // ✅ rensa cache så sidan inte visar gamla värden
+  clean_user_cache($user_id);
+  wp_cache_delete($user_id, 'users');
+  wp_cache_delete($user_id, 'user_meta');
+  wp_set_current_user($user_id);
+
+  // ✅ redirecta tillbaka till exakt samma profilsida + cache-buster
+  mk_redirect_self_with_ts();
+}
+
+/**
+ * =========================
+ * HANDLE PROFILE IMAGE UPLOAD
+ * =========================
+ * (Din befintliga) — men uppdaterad med cache-buster och owner-check
+ */
+if ($is_owner && isset($_FILES['profile_image_upload']) && !empty($_FILES['profile_image_upload']['name'])) {
+
   if (!function_exists('media_handle_upload')) {
     require_once(ABSPATH . 'wp-admin/includes/file.php');
     require_once(ABSPATH . 'wp-admin/includes/media.php');
     require_once(ABSPATH . 'wp-admin/includes/image.php');
   }
 
-  $user_id_upload = get_current_user_id();
-
-  // Process upload
   $attachment_id = media_handle_upload('profile_image_upload', 0);
 
   if (!is_wp_error($attachment_id)) {
-    // Store attachment ID (preferred)
-    update_user_meta($user_id_upload, 'profile_image', $attachment_id);
-
-    // Also store URL for backwards compatibility / convenience
-    update_user_meta($user_id_upload, 'profile_image_url', wp_get_attachment_url($attachment_id));
+    update_user_meta($profile_user_id, 'profile_image', $attachment_id);
+    update_user_meta($profile_user_id, 'profile_image_url', wp_get_attachment_url($attachment_id));
+  } else {
+    error_log('profile_image_upload error: ' . $attachment_id->get_error_message());
   }
 
-  // Redirect to avoid re-submit and to show updated image
-  wp_safe_redirect($_SERVER['REQUEST_URI']);
-  exit;
+  clean_user_cache($profile_user_id);
+  wp_cache_delete($profile_user_id, 'users');
+  wp_cache_delete($profile_user_id, 'user_meta');
+
+  mk_redirect_self_with_ts();
 }
 
+// Först NU börjar output
 get_header();
 
 $username = get_query_var('mk_user');
@@ -582,5 +689,53 @@ get_template_part('partials/modal', 'add-adventure');
 
   });
 </script>
+
+<style>
+  .mk-pulse {
+    animation: mkPulse 1.2s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(206, 224, 39, 0.8);
+  }
+  @keyframes mkPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(206, 224, 39, 0.75); transform: scale(1); }
+    70%  { box-shadow: 0 0 0 16px rgba(206, 224, 39, 0); transform: scale(1.02); }
+    100% { box-shadow: 0 0 0 0 rgba(206, 224, 39, 0); transform: scale(1); }
+  }
+</style>
+
+<script>
+document.addEventListener('alpine:initialized', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('edit') !== '1') return;
+
+  // Extra säkerhet: öppna bara om man är ägaren (PHP sätter true/false)
+  const isOwner = <?php echo $is_owner ? 'true' : 'false'; ?>;
+  if (!isOwner) return;
+
+  // 1) Öppna edit-profile modal
+  const store = Alpine.store('editProfileModal');
+  if (store) store.isOpen = true;
+
+  // 2) Highlighta profilbild/kamera så användaren fattar vad som ska göras
+  const badge = document.getElementById('profile-camera-badge');
+  const wrapper = document.querySelector('.fb-profile-wrapper');
+
+  if (badge) badge.classList.add('mk-pulse');
+
+  // 4) Städa URL så den inte triggas igen vid refresh
+  params.delete('edit');
+  const newUrl =
+    window.location.pathname +
+    (params.toString() ? `?${params}` : '') +
+    window.location.hash;
+
+  window.history.replaceState({}, '', newUrl);
+
+  // (valfritt) ta bort pulse efter några sekunder
+  setTimeout(() => {
+    if (badge) badge.classList.remove('mk-pulse');
+  }, 6000);
+});
+</script>
+
 
 <?php get_footer(); ?>

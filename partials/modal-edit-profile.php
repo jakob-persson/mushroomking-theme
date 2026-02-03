@@ -145,7 +145,10 @@ input {
     appearance: none;
 }
 
-
+#editProfileSaveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 
 
@@ -158,6 +161,7 @@ input {
     tempText: '',
     presentationTemp: `<?= esc_js($presentation_clean); ?>`,
     openOverlay: false,
+      isUploadingAvatar: false,
     saveText() {
         if(!this.tempText.trim()) return;
         this.presentationTemp = this.tempText;
@@ -280,44 +284,42 @@ input {
 </div>
 
 <div class="relative mt-4" x-data="{
-        country: '<?= esc_js($user_country); ?>',
-        countries: ['Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo (Congo-Brazzaville)','Costa Rica','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Holy See','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine State','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States of America','Uruguay','Uzbekistan','Vanuatu','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'],
-        filtered: [],
-        open: false,
-        cleared: false,
-        selectCountry(c) { this.country = c; this.open = false; },
-        clearOnFocus() { if(!this.cleared) { this.country = ''; this.cleared = true; } }
-    }">
-    
-    <input 
-        type="text" 
-        name="country" 
-        placeholder="Start typing your country..." 
-        autocomplete="off"
-        x-model="country"
-        @focus="clearOnFocus(); filtered = countries; open = true"
-        @input="filtered = countries.filter(c => c.toLowerCase().includes(country.toLowerCase())); open = filtered.length>0"
-        class="peer w-full px-4 py-3 rounded-xl bg-[#eff0ec] border focus:border-[#1E2330] focus:outline-none"
-    >
-    <label class="absolute left-4 top-1 text-gray-400 text-sm pointer-events-none transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500">
-        Country
-    </label>
+  country: '<?= esc_js($user_country); ?>',
+  countries: ['Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo (Congo-Brazzaville)','Costa Rica','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Holy See','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine State','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States of America','Uruguay','Uzbekistan','Vanuatu','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'],
+  filtered: [],
+  open: false,
+  selectCountry(c) { this.country = c; this.open = false; }
+}">
+  <input 
+    type="text" 
+    name="country" 
+    placeholder="Start typing your country..." 
+    autocomplete="off"
+    x-model="country"
+    @focus="filtered = countries; open = true"
+    @input="filtered = countries.filter(c => c.toLowerCase().includes(country.toLowerCase())); open = filtered.length>0"
+    class="peer w-full px-4 py-3 rounded-xl bg-[#eff0ec] border focus:border-[#1E2330] focus:outline-none"
+  >
+  <label class="absolute left-4 top-1 text-gray-400 text-sm pointer-events-none transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500">
+    Country
+  </label>
 
-    <ul 
-        x-show="open" 
-        @click.away="open = false" 
-        class="absolute left-0 top-full z-50 w-full max-h-40 overflow-y-auto bg-white border rounded-xl mt-1 shadow"
-    >
-        <template x-for="c in filtered" :key="c">
-            <li 
-                @click="selectCountry(c)" 
-                class="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                x-text="c"
-            ></li>
-        </template>
-        <li x-show="filtered.length === 0" class="px-4 py-2 text-gray-400 cursor-default">No results</li>
-    </ul>
+  <ul 
+    x-show="open" 
+    @click.away="open = false" 
+    class="absolute left-0 top-full z-50 w-full max-h-40 overflow-y-auto bg-white border rounded-xl mt-1 shadow"
+  >
+    <template x-for="c in filtered" :key="c">
+      <li 
+        @click="selectCountry(c)" 
+        class="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+        x-text="c"
+      ></li>
+    </template>
+    <li x-show="filtered.length === 0" class="px-4 py-2 text-gray-400 cursor-default">No results</li>
+  </ul>
 </div>
+
 
 
 
@@ -362,13 +364,19 @@ input {
 </div>
 <!-- Footer with Save button -->
 <div class="px-6 py-4 border-t border-gray-200 bg-white">
-    <button type="submit" form="editProfileForm"
-        class="w-full bg-[#1E2330] text-white py-3 rounded-xl hover:bg-gray-900 transition">
-        Save Changes
-    </button>
+<button id="editProfileSaveBtn" type="submit" form="editProfileForm"
+  class="w-full bg-[#1E2330] text-white py-3 rounded-xl hover:bg-gray-900 transition">
+  Save Changes
+</button>
+
 </div>
 <script>
 document.addEventListener('alpine:init', () => {
+    // ✅ Global store so footer button (outside x-data) can read it
+    Alpine.store('editProfile', {
+        isUploadingAvatar: false
+    });
+
     Alpine.data('editProfile', () => ({
         view: 'main',
         tempText: '',
@@ -376,8 +384,8 @@ document.addEventListener('alpine:init', () => {
         openOverlay: false,
         saveText() {
             if (!this.tempText.trim()) return;
-            this.presentationTemp = this.tempText; // uppdatera temporär text
-            this.back(); // gå tillbaka till main-view
+            this.presentationTemp = this.tempText;
+            this.back();
         },
         back() {
             this.view = 'main';
@@ -386,39 +394,52 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 </script>
+
 <script>
 function uploadAvatar(input) {
-    if (!input.files || !input.files[0]) return;
+  if (!input.files || !input.files[0]) return;
 
-    const file = input.files[0];
+  // ✅ Disable Save button immediately
+  const saveBtn = document.getElementById('editProfileSaveBtn');
+  if (saveBtn) saveBtn.disabled = true;
 
-    // 🔹 Instant preview
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById('profileAvatarPreview').src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+  const file = input.files[0];
 
-    // 🔹 Upload via AJAX
-    const formData = new FormData();
-    formData.append('action', 'upload_profile_avatar');
-    formData.append('avatar', file);
+  // 🔹 Instant preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('profileAvatarPreview');
+    if (img) img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 
-    fetch('<?= admin_url('admin-ajax.php'); ?>', {
-        method: 'POST',
-        body: formData,
-        credentials: 'same-origin'
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (!res.success) {
-            alert(res.data || 'Avatar upload failed');
-        }
-    })
-    .catch(() => {
-        alert('Upload error');
-    });
+  // 🔹 Upload via AJAX
+  const formData = new FormData();
+  formData.append('action', 'upload_profile_avatar');
+  formData.append('avatar', file);
+
+  fetch('<?= admin_url('admin-ajax.php'); ?>', {
+    method: 'POST',
+    body: formData,
+    credentials: 'same-origin'
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (!res.success) {
+      alert(res.data || 'Avatar upload failed');
+    }
+  })
+  .catch(() => {
+    alert('Upload error');
+  })
+  .finally(() => {
+    // ✅ Re-enable Save button when upload finishes (success or fail)
+    if (saveBtn) saveBtn.disabled = false;
+    input.value = '';
+  });
 }
 </script>
+
+
 
 

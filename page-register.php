@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finish_register']) &&
                 wp_set_auth_cookie($user_id);
 
                 $slug = strtolower(str_replace(' ', '-', $username));
-                wp_redirect(home_url('/' . $slug));
+               wp_redirect( home_url('/' . $slug . '/?edit=1') );
                 exit;
             } else {
                 $error = $user_id->get_error_message();

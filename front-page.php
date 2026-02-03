@@ -10,17 +10,15 @@
     <script>
       window.wpHuntId = <?= json_encode(get_query_var('hunt')); ?>;
     </script>
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.store('editAdventureModal', {
-        adventure: {},
-        open: false,
-        close() { this.open = false; },
+    <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('editAdventureModal', {
+            adventure: {},
+            open: false,
+            close() { this.open = false; },
+        });
     });
-});
-</script>
-
-
+    </script>
 
     <?php
     global $wpdb;
@@ -169,10 +167,18 @@ document.addEventListener('alpine:init', () => {
     global $wpdb;
 
     // fetch adventures
-    $hunts = $wpdb->get_results("
-        SELECT * FROM {$wpdb->prefix}mushrooms
+    $initial_limit = 5;
+
+    $hunts = $wpdb->get_results(
+      $wpdb->prepare(
+        "SELECT * FROM {$wpdb->prefix}mushrooms
         ORDER BY start_date DESC
-    ");
+        LIMIT %d OFFSET %d",
+        $initial_limit,
+        0
+      )
+    );
+
     ?>
 
 <section class="min-h-screen bg-[#EFF0EC] w-full">
@@ -226,119 +232,24 @@ document.addEventListener('alpine:init', () => {
     </div>
 
     <!-- MIDDLE COLUMN (FEED) -->
-    <div class="col-span-12 lg:col-span-6 lg:overflow-y-scroll lg:h-screen pt-10 lg:pl-6 lg:pr-4 space-y-8 pb-44">
-   <?php foreach ( $hunts as $hunt ) : ?>
-    <?php 
-        // Ensure integer user ID
-        $user_id = intval($hunt->user_id);
-        $user = get_user_by('id', $user_id);
-        $username = $user ? $user->display_name : 'Unknown';
-        $avatar = mk_get_user_avatar($user_id);
+   <!-- MIDDLE COLUMN (FEED) -->
+        <div
+          id="feed"
+          class="col-span-12 lg:col-span-6 lg:overflow-y-scroll lg:h-screen pt-10 lg:pl-6 lg:pr-4 space-y-8 pb-44"
+          data-offset="<?= esc_attr($initial_limit); ?>"
+          data-limit="5"
+        >
+          <?php foreach ($hunts as $hunt) { mk_render_feed_card($hunt); } ?>
 
-        // Get photos as array
-        $photos = json_decode($hunt->photo_url, true);
-        if (!$photos || !is_array($photos)) {
-            $photos = [$hunt->photo_url ?: get_template_directory_uri() . "/images/placeholder.png"];
-        }
+          <!-- Sentinel: när den syns -> ladda mer -->
+          <div id="feed-sentinel" class="h-10"></div>
 
-        $first_photo = $photos[0];
-
-        $weight = rtrim(rtrim(number_format((float)$hunt->kilograms, 2, ',', ''), '0'), ',');
-
-        $hunt_object = [
-            'id'             => intval($hunt->id),
-            'photos'         => $photos,
-            'photo'          => $first_photo,
-            'location'       => $hunt->location,
-            'date'           => $hunt->start_date,
-            'username'       => $username,
-            'user_id'        => $hunt->user_id,
-            'total_kg'       => floatval($hunt->kilograms ?? 0),
-            'type'           => $hunt->type ?? '{}',
-            'adventure_text' => $hunt->adventure_text ?? '',
-        ];
-    ?>
-
-    <div 
-        class="relative bg-white rounded-[30px] overflow-hidden shadow-sm cursor-pointer ml-[1px]"
-        style="width: calc(100% - 11px); aspect-ratio: 1 / 1;"
-        @click='$store.adventureModal.open(<?= json_encode($hunt_object, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'
-    >
-        <img src="<?= esc_url($first_photo); ?>" class="absolute inset-0 w-full h-full object-cover">
-
-        <div class="absolute top-0 left-0 right-0 h-36 bg-gradient-to-b from-black/60 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
-
-        <div class="absolute top-4 left-4 flex items-center gap-3 z-20 w-[50%]" style="z-index:9">
-            <img src="<?= esc_url($avatar); ?>" class="w-10 h-10 rounded-full shadow-md object-cover">
-            <div class="text-white drop-shadow text-sm"><?= esc_html($username); ?></div>
-        </div>
-
-        <div class="absolute bottom-4 lg:bottom-6 left-6 right-6 rounded-[30px] pb-6 flex justify-between items-start z-30">
-            <div class="max-w-[100%] flex flex-col">
-                <div class="text-white text-2xl gilroy" style="line-height:18px"><?= esc_html($hunt->location); ?></div>
-                <div class="text-white">
-                    <span class="font-regular text-xs"><?= esc_html($hunt->start_date); ?> • <?= esc_html($weight); ?>kg</span>
-                </div>
-                <div class="text-white font-regular text-sm leading-snug mt-1"><?= esc_html(wp_trim_words($hunt->adventure_text, 15)); ?></div>
-            </div>    
-        </div>
-        <!-- Actions -->
-          <div class="absolute top-5 right-4" x-data="{ open: false }">
-
-              <!-- More button -->
-              <button
-                  @click.stop="open = !open"
-                  :class="open
-                      ? 'bg-white dark shadow-md'
-                      : 'bg-transparent text-white'"
-                  class="w-10 h-10 rounded-full flex items-center justify-center transition"
-              >
-                  <i class="fas fa-ellipsis-h text-xl"></i>
-              </button>
-
-              <!-- Dropdown -->
-              <div x-show="open" x-transition @click.away="open = false"
-                  class="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg z-50 p-4">
-
-                  <!-- Edit -->
-                  <button
-                      x-data
-                      data-hunt='<?= htmlspecialchars(json_encode($hunt_object), ENT_QUOTES, 'UTF-8') ?>'
-                      @click.stop="
-                          $store.editAdventureModal.adventure = JSON.parse($el.dataset.hunt);
-                          open = false;
-                          $nextTick(() => $store.editAdventureModal.open = true);
-                      "
-                      class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm dark hover:bg-[#eff0ec] rounded-md"
-                  >
-                      <i class="fas fa-pen w-4"></i>
-                      <span>Edit adventure</span>
-                  </button>
-
-                  <!-- Delete -->
-                  <?php if ( get_current_user_id() === intval($hunt->user_id) ) : ?>
-                  <button
-                      @click.stop="
-                          open = false;
-                          if (confirm('Are you sure you want to delete this adventure? This cannot be undone.')) {
-                              deleteAdventure(<?= intval($hunt->id); ?>);
-                          }
-                      "
-                      class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm dark hover:bg-[#eff0ec] rounded-md"
-                  >
-                      <i class="fas fa-trash-alt w-4"></i>
-                      <span>Delete</span>
-                  </button>
-                  <?php endif; ?>
-
-              </div>
+          <!-- Loader text -->
+          <div id="feed-loader" class="hidden text-center text-sm text-gray-500 py-6">
+            Loading more…
           </div>
-      </div>
+        </div>
 
-
-      <?php endforeach; ?>
-  </div>
 
 
         <!-- RIGHT COLUMN (USER LIST) -->
@@ -354,18 +265,29 @@ document.addEventListener('alpine:init', () => {
                 'exclude' => [$current_user_id], // <-- Exclude logged-in user
             ]);
             ?>
-            <div class="bg-white rounded-3xl p-4 space-y-4">
+            <div class="bg-white rounded-3xl p-2 space-y-4">
                 <?php if (!empty($all_users)) : ?>
-                    <ul class="space-y-3">
+                    <ul class="space-y-1">
                         <?php foreach ($all_users as $user) :
                             $avatar = mk_get_user_avatar($user->ID);
                         ?>
-                        <li class="flex items-center gap-3">
-                            <img src="<?= esc_url($avatar); ?>" 
-                                alt="<?= esc_attr($user->display_name); ?>" 
-                                class="w-10 h-10 rounded-full object-cover shadow-sm">
+                      <?php
+                          $profile_url = home_url('/' . $user->user_nicename);
+                        ?>
+                        <li>
+                          <a
+                            href="<?= esc_url($profile_url); ?>"
+                            class="flex items-center gap-2 p-2 rounded-xl hover:bg-[#eff0ec] transition"
+                          >
+                            <img
+                              src="<?= esc_url($avatar); ?>"
+                              alt="<?= esc_attr($user->display_name); ?>"
+                              class="w-10 h-10 rounded-full object-cover shadow-sm"
+                            >
                             <span class="text-sm font-medium"><?= esc_html($user->display_name); ?></span>
+                          </a>
                         </li>
+
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
@@ -380,9 +302,6 @@ document.addEventListener('alpine:init', () => {
 </section>
 
 <?php endif; ?>
-
-
-
 
 <?php if ( !is_user_logged_in() ) : ?>
 
@@ -520,3 +439,78 @@ function deleteAdventure(adventureId) {
     });
 }
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const feed = document.getElementById("feed");
+  const sentinel = document.getElementById("feed-sentinel");
+  const loader = document.getElementById("feed-loader");
+
+  if (!feed || !sentinel) return;
+
+  let offset = parseInt(feed.dataset.offset || "5", 10);
+  const limit = parseInt(feed.dataset.limit || "5", 10);
+
+  let loading = false;
+  let done = false;
+
+  const ajaxUrl = "<?= esc_js(admin_url('admin-ajax.php')); ?>";
+  const nonce = "<?= esc_js(wp_create_nonce('mk_load_more_hunts')); ?>";
+
+  async function loadMore() {
+    if (loading || done) return;
+    loading = true;
+    if (loader) loader.classList.remove("hidden");
+
+    try {
+      const body = new URLSearchParams();
+      body.append("action", "mk_load_more_hunts");
+      body.append("_ajax_nonce", nonce);
+      body.append("offset", offset);
+      body.append("limit", limit);
+
+      const res = await fetch(ajaxUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+        body
+      });
+
+      const data = await res.json();
+      if (!data || !data.success) {
+        done = true;
+        return;
+      }
+
+      const html = data.data.html || "";
+      const count = parseInt(data.data.count || "0", 10);
+
+      if (!html || count === 0) {
+        done = true;
+        return;
+      }
+
+      // Lägg in nya cards före sentinel
+      sentinel.insertAdjacentHTML("beforebegin", html);
+      offset += count;
+      feed.dataset.offset = String(offset);
+
+    } catch (e) {
+      // vid nätfel: sluta spamma
+      done = true;
+    } finally {
+      loading = false;
+      if (loader) loader.classList.add("hidden");
+    }
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    if (entry.isIntersecting) loadMore();
+  }, {
+    root: feed,            // eftersom du scrollar i feeden (overflow-y)
+    rootMargin: "600px 0px" // börja ladda innan man når botten
+  });
+
+  observer.observe(sentinel);
+});
+</script>
+
