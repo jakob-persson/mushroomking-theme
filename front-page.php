@@ -444,73 +444,85 @@ document.addEventListener("DOMContentLoaded", () => {
   const feed = document.getElementById("feed");
   const sentinel = document.getElementById("feed-sentinel");
   const loader = document.getElementById("feed-loader");
-
   if (!feed || !sentinel) return;
 
   let offset = parseInt(feed.dataset.offset || "5", 10);
   const limit = parseInt(feed.dataset.limit || "5", 10);
-
   let loading = false;
   let done = false;
 
   const ajaxUrl = "<?= esc_js(admin_url('admin-ajax.php')); ?>";
   const nonce = "<?= esc_js(wp_create_nonce('mk_load_more_hunts')); ?>";
 
+  // ✅ Avgör om feed verkligen är en scroll-container (desktop) eller inte (mobile)
+  function isScrollable(el) {
+    const s = window.getComputedStyle(el);
+    const canScroll = /(auto|scroll)/.test(s.overflowY);
+    return canScroll && el.scrollHeight > el.clientHeight + 2;
+  }
+
   async function loadMore() {
     if (loading || done) return;
     loading = true;
-    if (loader) loader.classList.remove("hidden");
+    loader?.classList.remove("hidden");
 
     try {
-      const body = new URLSearchParams();
-      body.append("action", "mk_load_more_hunts");
-      body.append("_ajax_nonce", nonce);
-      body.append("offset", offset);
-      body.append("limit", limit);
+      const body = new URLSearchParams({
+        action: "mk_load_more_hunts",
+        _ajax_nonce: nonce,
+        offset: String(offset),
+        limit: String(limit),
+      });
 
       const res = await fetch(ajaxUrl, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-        body
+        body,
+        credentials: "same-origin", // ✅ bra praxis för WP
       });
 
+      if (!res.ok) throw new Error("HTTP " + res.status);
+
       const data = await res.json();
-      if (!data || !data.success) {
-        done = true;
-        return;
-      }
+      if (!data?.success) { done = true; return; }
 
       const html = data.data.html || "";
       const count = parseInt(data.data.count || "0", 10);
+      if (!html || count === 0) { done = true; return; }
 
-      if (!html || count === 0) {
-        done = true;
-        return;
-      }
-
-      // Lägg in nya cards före sentinel
       sentinel.insertAdjacentHTML("beforebegin", html);
       offset += count;
       feed.dataset.offset = String(offset);
 
     } catch (e) {
-      // vid nätfel: sluta spamma
+      // om det felar: sluta trigga för att inte spamma
       done = true;
+      // console.log("loadMore failed", e);
     } finally {
       loading = false;
-      if (loader) loader.classList.add("hidden");
+      loader?.classList.add("hidden");
     }
   }
 
+  const rootEl = isScrollable(feed) ? feed : null; // ✅ DESKTOP: feed / MOBILE: viewport
+
   const observer = new IntersectionObserver((entries) => {
-    const entry = entries[0];
-    if (entry.isIntersecting) loadMore();
+    if (entries[0]?.isIntersecting) loadMore();
   }, {
-    root: feed,            // eftersom du scrollar i feeden (overflow-y)
-    rootMargin: "600px 0px" // börja ladda innan man når botten
+    root: rootEl,
+    rootMargin: "600px 0px",
+    threshold: 0,
   });
 
   observer.observe(sentinel);
+
+  // ✅ iOS-säkring: om observer strular, trigga även när man är nära botten
+  window.addEventListener("scroll", () => {
+    if (done || loading) return;
+    const rect = sentinel.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 600) loadMore();
+  }, { passive: true });
 });
+
 </script>
 
