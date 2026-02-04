@@ -719,7 +719,7 @@ function mk_render_feed_card($hunt) {
   ];
   ?>
   <div
-    class="relative bg-white rounded-[30px] overflow-hidden shadow-sm cursor-pointer ml-[1px] feed-card"
+    class="relative bg-white rounded-[30px] overflow-hidden shadow-sm cursor-pointer ml-[1px] feed-card z-1"
     style="width: calc(100% - 11px); aspect-ratio: 1 / 1;"
     @click='$store.adventureModal.open(<?= json_encode($hunt_object, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'
   >
@@ -794,7 +794,7 @@ function mk_render_feed_card($hunt) {
 
       <a
         href="<?= esc_url($profile_url); ?>"
-        class="absolute top-4 left-4 flex items-center gap-3 z-20 w-[50%] hover:opacity-90 transition"
+        class="absolute top-4 left-4 flex items-center gap-3 z-1 w-[50%] hover:opacity-90 transition"
         @click.stop
         >
         <img src="<?= esc_url($avatar); ?>" class="w-10 h-10 rounded-full object-cover">
@@ -802,7 +802,7 @@ function mk_render_feed_card($hunt) {
         </a>
 
 
-    <div class="absolute bottom-4 lg:bottom-6 left-6 right-6 rounded-[30px] pb-6 flex justify-between items-start z-30">
+    <div class="absolute bottom-4 lg:bottom-6 left-6 right-6 rounded-[30px] pb-6 flex justify-between items-start z-1">
       <div class="max-w-[100%] flex flex-col">
         <div class="text-white text-2xl gilroy" style="line-height:18px"><?= esc_html($hunt->location); ?></div>
         <div class="text-white">
