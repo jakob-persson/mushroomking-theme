@@ -11,10 +11,18 @@ if (is_user_logged_in()) {
 }
 
 $error = '';
-$step = isset($_POST['step']) ? (string) $_POST['step'] : '1';
+$step  = isset($_POST['step']) ? (string) $_POST['step'] : '1';
 
 // Reserved usernames
 $reserved_slugs = ['login','register','insights','forgot-password','wp-admin','wp-login.php'];
+
+/**
+ * Registration limit
+ * NOTE: count_users() counts ALL WP users (inkl admin). Vill du exkludera admins/testa annorlunda,
+ * säg till så justerar vi.
+ */
+$user_total = (int) (count_users()['total_users'] ?? 0);
+$reg_closed = ($user_total >= 3); // Max 3 test accounts
 
 // Countries list
 $countries = [
@@ -44,26 +52,33 @@ $countries = [
 /*--------------------------------------------------------------
  STEP 1 — Send Verification Code
 --------------------------------------------------------------*/
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $step == 1 && isset($_POST['send_code'])) {
-    $email = sanitize_email($_POST['email']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $step == '1' && isset($_POST['send_code'])) {
 
-    if (!is_email($email)) {
-        $error = 'Invalid email address.';
-    } elseif (email_exists($email)) {
-        $error = 'Email already exists.';
+    // If closed: block and keep step 1
+    if ($reg_closed) {
+        $error = 'Registration is closed. Max 3 test accounts allowed.';
+        $step  = '1';
     } else {
-        $code = rand(100000, 999999);
-        $_SESSION['verify_email'] = $email;
-        $_SESSION['verify_code']  = $code;
-        $_SESSION['verify_time']  = time();
+        $email = sanitize_email($_POST['email'] ?? '');
 
-        wp_mail(
-            $email,
-            'Your Verification Code',
-            'Your verification code is: ' . $code . "\n\nThis code is valid for 10 minutes."
-        );
+        if (!is_email($email)) {
+            $error = 'Invalid email address.';
+        } elseif (email_exists($email)) {
+            $error = 'Email already exists.';
+        } else {
+            $code = rand(100000, 999999);
+            $_SESSION['verify_email'] = $email;
+            $_SESSION['verify_code']  = $code;
+            $_SESSION['verify_time']  = time();
 
-        $step = '1.5';
+            wp_mail(
+                $email,
+                'Your Verification Code',
+                'Your verification code is: ' . $code . "\n\nThis code is valid for 10 minutes."
+            );
+
+            $step = '1.5';
+        }
     }
 }
 
@@ -71,22 +86,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $step == 1 && isset($_POST['send_co
  STEP 1.5 — Resend Code
 --------------------------------------------------------------*/
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_code'])) {
-    if (!empty($_SESSION['verify_email'])) {
-        $code = rand(100000, 999999);
-        $_SESSION['verify_code'] = $code;
-        $_SESSION['verify_time'] = time();
-
-        wp_mail(
-            $_SESSION['verify_email'],
-            'Your New Verification Code',
-            'Your new verification code is: ' . $code . "\n\nThis code is valid for 10 minutes."
-        );
-
-        $error = 'A new code has been sent.';
-        $step  = '1.5';
-    } else {
-        $error = 'Your session expired. Please start again.';
+    // If closed, block resends too
+    if ($reg_closed) {
+        $error = 'Registration is closed. Max 3 test accounts allowed.';
         $step  = '1';
+    } else {
+        if (!empty($_SESSION['verify_email'])) {
+            $code = rand(100000, 999999);
+            $_SESSION['verify_code'] = $code;
+            $_SESSION['verify_time'] = time();
+
+            wp_mail(
+                $_SESSION['verify_email'],
+                'Your New Verification Code',
+                'Your new verification code is: ' . $code . "\n\nThis code is valid for 10 minutes."
+            );
+
+            $error = 'A new code has been sent.';
+            $step  = '1.5';
+        } else {
+            $error = 'Your session expired. Please start again.';
+            $step  = '1';
+        }
     }
 }
 
@@ -94,47 +115,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_code'])) {
  STEP 1.5 → 2 — Verify Code
 --------------------------------------------------------------*/
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_code']) && $step == '1.5') {
-    $entered_code = sanitize_text_field($_POST['verification_code']);
-    $is_expired   = (time() - ($_SESSION['verify_time'] ?? 0)) > 600;
-
-    if ($is_expired) {
-        $error = 'Your verification code has expired. Request a new one.';
-        $step = '1.5';
-    } elseif ($entered_code == $_SESSION['verify_code']) {
-        $step = 2;
+    // If closed, don’t allow further steps
+    if ($reg_closed) {
+        $error = 'Registration is closed. Max 3 test accounts allowed.';
+        $step  = '1';
     } else {
-        $error = 'Incorrect verification code.';
-        $step  = '1.5';
+        $entered_code = sanitize_text_field($_POST['verification_code'] ?? '');
+        $is_expired   = (time() - ($_SESSION['verify_time'] ?? 0)) > 600;
+
+        if ($is_expired) {
+            $error = 'Your verification code has expired. Request a new one.';
+            $step  = '1.5';
+        } elseif ($entered_code == ($_SESSION['verify_code'] ?? '')) {
+            $step = '2';
+        } else {
+            $error = 'Incorrect verification code.';
+            $step  = '1.5';
+        }
     }
 }
 
 /*--------------------------------------------------------------
  STEP 2 — Save PASSWORD ONLY, move to STEP 3
 --------------------------------------------------------------*/
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['continue_to_step3']) && $step == 2) {
-    $_SESSION['reg_password'] = $_POST['password'];
-    $step = 3;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['continue_to_step3']) && $step == '2') {
+    if ($reg_closed) {
+        $error = 'Registration is closed. Max 3 test accounts allowed.';
+        $step  = '1';
+    } else {
+        $_SESSION['reg_password'] = (string) ($_POST['password'] ?? '');
+        $step = '3';
+    }
 }
 
 /*--------------------------------------------------------------
  STEP 3 — FINAL REGISTRATION + USERNAME + COUNTRY + GENDER
 --------------------------------------------------------------*/
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finish_register']) && $step == 3) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finish_register']) && $step == '3') {
 
-    $username = sanitize_user($_POST['username']);
-    $password = $_SESSION['reg_password'] ?? '';
-    $email    = sanitize_email($_SESSION['verify_email']);
-    $country  = sanitize_text_field($_POST['country']);
-    $gender   = sanitize_text_field($_POST['gender']);
-
-    // Limit to 7 users
-    $user_count = count_users();
-    if ($user_count['total_users'] >= 7) {
-        $error = 'Registration is closed. Max 7 test accounts allowed.';
-        $step  = 1;
+    if ($reg_closed) {
+        $error = 'Registration is closed. Max 3 test accounts allowed.';
+        $step  = '1';
     } else {
-        if (in_array(strtolower($username), $reserved_slugs)) {
-            $username .= rand(10,99);
+        $username = sanitize_user($_POST['username'] ?? '');
+        $password = (string) ($_SESSION['reg_password'] ?? '');
+        $email    = sanitize_email($_SESSION['verify_email'] ?? '');
+        $country  = sanitize_text_field($_POST['country'] ?? '');
+        $gender   = sanitize_text_field($_POST['gender'] ?? '');
+
+        if (in_array(strtolower($username), $reserved_slugs, true)) {
+            $username .= rand(10, 99);
         }
 
         if (!username_exists($username) && !email_exists($email)) {
@@ -149,13 +179,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finish_register']) &&
                 update_user_meta($user_id, 'country', $country);
                 update_user_meta($user_id, 'gender', $gender);
 
-                unset($_SESSION['verify_code'], $_SESSION['verify_email'], $_SESSION['verify_time'], $_SESSION['reg_password']);
+                unset(
+                    $_SESSION['verify_code'],
+                    $_SESSION['verify_email'],
+                    $_SESSION['verify_time'],
+                    $_SESSION['reg_password']
+                );
 
                 wp_set_current_user($user_id);
                 wp_set_auth_cookie($user_id);
 
                 $slug = strtolower(str_replace(' ', '-', $username));
-               wp_redirect( home_url('/' . $slug . '/?edit=1') );
+                wp_redirect(home_url('/' . $slug . '/?edit=1'));
                 exit;
             } else {
                 $error = $user_id->get_error_message();
@@ -172,10 +207,9 @@ $step_headings = [
   '1.5' => ['title' => 'Check Your Email', 'desc' => 'We’ve sent you a 6-digit code. Enter it below to continue.'],
   '2'   => ['title' => 'Choose Password', 'desc' => 'Create a password for your account.'],
   '3'   => ['title' => 'Complete Your Profile', 'desc' => 'Add your name, country and gender.'],
-
 ];
 
-$current_heading = $step_headings[$step] ?? ['title'=>'Create an Account','desc'=>'Join the Mushroom community'];
+$current_heading = $step_headings[$step] ?? ['title' => 'Create an Account', 'desc' => 'Join the Mushroom community'];
 
 get_header();
 ?>
@@ -198,11 +232,12 @@ button:disabled { background-color:#E0E2D9 !important; cursor:not-allowed; color
   <div class="flex items-center justify-center bg-white px-6 py-12 md:py-24">
     <div class="w-full max-w-md space-y-4">
 
-    <?php if (count_users()['total_users'] >= 7): ?>
-      <div class="p-4 bg-yellow-100 text-yellow-800 rounded text-center">
-          🚨 Registration is closed — 7 test accounts already created.
-      </div>
-    <?php else: ?>
+      <?php if ($reg_closed): ?>
+        <div class="p-4 bg-yellow-100 text-yellow-800 rounded text-center">
+          🚨 Registration is closed. Max 3 test accounts allowed.
+        </div>
+      <?php endif; ?>
+
       <form method="post" class="space-y-4">
         <?php if ($error): ?>
           <div class="p-3 bg-red-100 text-red-700 rounded"><?php echo esc_html($error); ?></div>
@@ -216,79 +251,91 @@ button:disabled { background-color:#E0E2D9 !important; cursor:not-allowed; color
         </p>
 
         <?php
-        $old_country = $_POST['country'] ?? '';
-        $old_gender  = $_POST['gender'] ?? '';
+          $old_country = $_POST['country'] ?? '';
+          $old_gender  = $_POST['gender'] ?? '';
         ?>
 
-        <?php if ($step == 1): ?>
+        <?php if ($step == '1'): ?>
           <input type="hidden" name="step" value="1">
-          <input type="email" name="email" required placeholder="Email address" class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border" value="<?= esc_attr($_POST['email'] ?? '') ?>">
-          <button type="submit" name="send_code" class="w-full bg-[#1E2330] text-white py-3 rounded-xl hover:bg-gray-900">Continue →</button>
-          
+
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="Email address"
+            class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border <?= $reg_closed ? 'opacity-60 cursor-not-allowed' : '' ?>"
+            value="<?= esc_attr($_POST['email'] ?? '') ?>"
+            <?= $reg_closed ? 'disabled' : '' ?>
+          >
+
+          <button
+            type="submit"
+            name="send_code"
+            class="w-full bg-[#1E2330] text-white py-3 rounded-xl hover:bg-gray-900"
+            <?= $reg_closed ? 'disabled' : '' ?>
+          >
+            Continue →
+          </button>
+
           <div class="text-center mt-4 text-sm">
             Already have an account? <span class="text-purple-600"><a href="/mk/login">Log in</a></span>
           </div>
 
-       <?php elseif ($step == '1.5'): ?>
-            <input type="hidden" name="step" value="1.5">
-            <label class="block mb-2 text-sm mt-3 text-center">Verification Code</label>
+        <?php elseif ($step == '1.5'): ?>
+          <input type="hidden" name="step" value="1.5">
+          <label class="block mb-2 text-sm mt-3 text-center">Verification Code</label>
 
-            <div id="code-inputs" class="flex space-x-2 mb-4 justify-center">
-                <?php for ($i=0;$i<6;$i++): ?>
-                    <input type="tel" pattern="[0-9]*" inputmode="numeric" maxlength="1" autocomplete="one-time-code"
-                          class="code-box w-12 h-12 text-center text-xl border rounded-xl bg-[#F6F7F5]" />
-                <?php endfor; ?>
-            </div>
+          <div id="code-inputs" class="flex space-x-2 mb-4 justify-center">
+            <?php for ($i=0;$i<6;$i++): ?>
+              <input type="tel" pattern="[0-9]*" inputmode="numeric" maxlength="1" autocomplete="one-time-code"
+                    class="code-box w-12 h-12 text-center text-xl border rounded-xl bg-[#F6F7F5]" />
+            <?php endfor; ?>
+          </div>
 
-            <input type="hidden" name="verification_code" id="verification_code_final">
+          <input type="hidden" name="verification_code" id="verification_code_final">
 
-            <button type="submit" name="verify_code" class="w-full bg-[#1E2330] text-white py-3 rounded-xl hover:bg-gray-900">Verify & Continue →</button>
+          <button type="submit" name="verify_code" class="w-full bg-[#1E2330] text-white py-3 rounded-xl hover:bg-gray-900">Verify & Continue →</button>
 
-            <button type="submit" name="resend_code" class="w-full text-center text-purple-600 hover:underline mt-2">Resend Code</button>
+          <button type="submit" name="resend_code" class="w-full text-center text-purple-600 hover:underline mt-2">Resend Code</button>
 
-            <p id="resend-timer" class="text-center text-sm text-gray-600 mt-2">
-                Code expires in 10:00
-            </p>
+          <p id="resend-timer" class="text-center text-sm text-gray-600 mt-2">
+            Code expires in 10:00
+          </p>
 
-        <?php elseif ($step == 2): ?>
+        <?php elseif ($step == '2'): ?>
           <input type="hidden" name="step" value="2">
-          
-          <!-- PASSWORD ONLY -->
-                <div class="relative w-full">
-                <input 
-                    type="password" 
-                    name="password" 
-                    required 
-                    id="password-field"
-                    placeholder="Password"
-                    class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border pr-12"
-                >
 
-               <i id="togglePassword" class="fa-regular fa-eye absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 cursor-pointer"></i>
-
-                </div>
+          <div class="relative w-full">
+            <input
+              type="password"
+              name="password"
+              required
+              id="password-field"
+              placeholder="Password"
+              class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border pr-12"
+            >
+            <i id="togglePassword" class="fa-regular fa-eye absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 cursor-pointer"></i>
+          </div>
 
           <button type="submit" name="continue_to_step3"
                   class="px-6 py-3 rounded-xl bg-[#1E2330] text-white w-full mt-6">Continue →</button>
 
-        <?php elseif ($step == 3): ?>
+        <?php elseif ($step == '3'): ?>
           <input type="hidden" name="step" value="3">
 
-          <!-- USERNAME MOVED HERE -->
           <label class="block text-sm mb-2">Name</label>
-            <input 
-                type="text" 
-                name="username" 
-                required 
-                placeholder="Name"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
-                autocomplete="off"
-                class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border"
-                value="<?= esc_attr($_SESSION['reg_username'] ?? '') ?>"
-
-            >
+          <input
+            type="text"
+            name="username"
+            required
+            placeholder="Name"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            autocomplete="off"
+            class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border"
+            value="<?= esc_attr($_SESSION['reg_username'] ?? '') ?>"
+          >
 
           <label class="block text-sm mb-2 mt-4">Country</label>
           <div class="relative w-full">
@@ -297,38 +344,36 @@ button:disabled { background-color:#E0E2D9 !important; cursor:not-allowed; color
           </div>
 
           <label class="block text-sm mb-2 mt-4">Gender</label>
-
           <div x-data="{ open:false }" class="relative w-full">
-              <select 
-                  name="gender" 
-                  id="gender-select"
-                  x-on:focus="open = true"
-                  x-on:blur="open = false"
-                  required
-                  class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border appearance-none"
-              >
-                  <option value="" disabled <?= $old_gender==''?'selected':'' ?>>Select your gender</option>
-                  <option value="Male" <?= $old_gender=='Male'?'selected':'' ?>>Male</option>
-                  <option value="Female" <?= $old_gender=='Female'?'selected':'' ?>>Female</option>
-                  <option value="Other" <?= $old_gender=='Other'?'selected':'' ?>>Other</option>
-              </select>
+            <select
+              name="gender"
+              id="gender-select"
+              x-on:focus="open = true"
+              x-on:blur="open = false"
+              required
+              class="w-full px-4 py-3 rounded-xl bg-[#F6F7F5] border appearance-none"
+            >
+              <option value="" disabled <?= $old_gender==''?'selected':'' ?>>Select your gender</option>
+              <option value="Male" <?= $old_gender=='Male'?'selected':'' ?>>Male</option>
+              <option value="Female" <?= $old_gender=='Female'?'selected':'' ?>>Female</option>
+              <option value="Other" <?= $old_gender=='Other'?'selected':'' ?>>Other</option>
+            </select>
 
-              <svg xmlns="http://www.w3.org/2000/svg" 
-                  :class="{ 'rotate-180': open }"
-                  class="w-4 h-4 transform transition-transform absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
+            <svg xmlns="http://www.w3.org/2000/svg"
+              :class="{ 'rotate-180': open }"
+              class="w-4 h-4 transform transition-transform absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
 
           <button type="submit" name="finish_register"
                   class="px-6 py-3 rounded-xl bg-[#1E2330] text-white mt-6 w-full">
-              Finish & Create Account
+            Finish & Create Account
           </button>
-
         <?php endif; ?>
       </form>
-    <?php endif; ?>
+
     </div>
   </div>
 
@@ -345,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const finishBtn = document.getElementById("finish-btn");
 
   function updateFinishBtn() {
-      if (!finishBtn) return;
+      if (!finishBtn || !countryInput || !genderSelect) return;
       finishBtn.disabled = !(countryInput.value.trim() && genderSelect.value.trim());
   }
 
@@ -370,11 +415,11 @@ document.addEventListener("DOMContentLoaded", () => {
       updateFinishBtn();
   }
 
-  // Verification code inputs
   const codeInputs = document.querySelectorAll("#code-inputs input");
   const codeHidden = document.getElementById("verification_code_final");
 
   function updateHidden() {
+      if (!codeHidden) return;
       codeHidden.value = Array.from(codeInputs).map(i => i.value).join('');
   }
 
@@ -439,8 +484,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 </script>
-
-
-
 
 <?php get_footer(); ?>

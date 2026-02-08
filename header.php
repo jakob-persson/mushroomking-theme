@@ -22,165 +22,38 @@
       <script src="https://cdn.tailwindcss.com"></script>
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
       <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
       <!-- <script src="https://cdn.tiny.cloud/1/2dc6eoughgw3zqdzbstj8cso24vdek5p8ennhvcm4sfi7y0h/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script> -->
 
       <?php wp_head(); ?>
     </head>
-    <script>
-      document.addEventListener('alpine:init', () => {
-        Alpine.store('editAdventureModal', {
-          adventure: {},
-          open: false,
-          close() {
-            this.open = false;
-          },
-          openModal(data) {
-            this.adventure = data;
-            this.open = true;
-          }
-        });
+      <script defer>
+    document.addEventListener('alpine:init', () => {
+      if (window.focus) Alpine.plugin(window.focus);
+
+      Alpine.store('modal', { isOpen: false });
+      Alpine.store('editProfileModal', { isOpen: false });
+
+      Alpine.store('adventureModal', {
+        isOpen: false,
+        adventure: null,
+        open(data) { this.adventure = data; this.isOpen = true },
+        close() { this.isOpen = false }
       });
-    </script>
 
-
-
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        tinymce.init({
-          selector: '#adventure_text',
-          menubar: false,
-          toolbar: 'bold italic underline | bullist numlist | link | undo redo',
-          placeholder: 'Write about your mushroom adventure...',
-          height: 200
-        });
+      Alpine.store('editAdventureModal', {
+        adventure: {},
+        open: false,
+        close() { this.open = false },
+        openModal(data) { this.adventure = data; this.open = true }
       });
-    </script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const photoInput = document.getElementById('mushroom_photo');
-        const previewImg = document.getElementById('preview_img');
-        const previewContainer = document.getElementById('image_preview');
-        const removeButton = document.getElementById('remove_preview');
+    });
+  </script>
 
-        // Show preview when image is selected
-        photoInput.addEventListener('change', function(event) {
-          const file = event.target.files[0];
-          if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              previewImg.src = e.target.result;
-              previewContainer.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-          } else {
-            previewContainer.classList.add('hidden');
-            previewImg.src = '';
-          }
-        });
+   
 
-        // Remove preview and clear input
-        removeButton.addEventListener('click', function() {
-          photoInput.value = ''; // Clear file input
-          previewImg.src = '';
-          previewContainer.classList.add('hidden');
-        });
-      });
-    </script>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('mushroom_photo');
-        const uploadBox = document.getElementById('upload_box');
-        const previewContainer = document.getElementById('image_preview');
-        const previewImage = document.getElementById('preview_img');
-        const removeButton = document.getElementById('remove_preview');
-
-        fileInput.addEventListener('change', function() {
-          const file = this.files[0];
-          if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              previewImage.src = e.target.result;
-              uploadBox.style.display = 'none';
-              previewContainer.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-
-        removeButton.addEventListener('click', function() {
-          fileInput.value = '';
-          previewImage.src = '';
-          uploadBox.style.display = 'flex';
-          previewContainer.style.display = 'none';
-        });
-      });
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const container = document.getElementById("tilt-container");
-        const image = container.querySelector("img");
-
-        let targetX = 0,
-          targetY = 0;
-        let currentX = 0,
-          currentY = 0;
-        let isHovering = false;
-
-        const animate = () => {
-          // Smooth easing toward target position
-          currentX += (targetX - currentX) * 0.1;
-          currentY += (targetY - currentY) * 0.1;
-
-          if (isHovering) {
-            image.style.transform = `rotateX(${currentY}deg) rotateY(${currentX}deg) scale(1.05)`;
-          } else {
-            image.style.transform = `rotateX(${currentY}deg) rotateY(${currentX}deg) scale(1)`;
-          }
-
-          requestAnimationFrame(animate);
-        };
-
-        container.addEventListener("mousemove", (e) => {
-          const rect = container.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          // Tilt range: max ±15 degrees
-          targetX = ((x / rect.width) - 0.5) * -30;
-          targetY = ((y / rect.height) - 0.5) * 30;
-        });
-
-        container.addEventListener("mouseenter", () => {
-          isHovering = true;
-        });
-
-        container.addEventListener("mouseleave", () => {
-          isHovering = false;
-          targetX = 0;
-          targetY = 0;
-        });
-
-        animate();
-      });
-    </script>
-    <script>
-      // Alpine modal store
-      document.addEventListener('alpine:init', () => {
-        Alpine.store('modal', {
-          isOpen: false
-        });
-      });
-    </script>
-    <script>
-      document.addEventListener('alpine:init', () => {
-        Alpine.store('editProfileModal', {
-          isOpen: false
-        });
-      });
-    </script>
     <?php
     // Check if current page uses the adventure summary template
     $is_adventure_template = function_exists('is_page_template') ? is_page_template('page-adventure-summary.php') : false;
@@ -205,6 +78,8 @@
       $extra_classes .= ' bg-[#1E2330]';
     } elseif (is_page_template('edit-profile.php')) {
       $extra_classes .= ' bg-[#F9F9F9]';
+    } elseif (is_page_template('page-how-it-works.php')) {
+      $extra_classes .= ' bg-[#FF9313]';
     } elseif ($is_adventure_template || $has_hunt_param) {
       $extra_classes .= ' bg-[#ffffff]';
     } elseif (get_query_var('current_user_obj')) {
@@ -213,7 +88,14 @@
       $extra_classes .= ' bg-[#124C12]';
     }
     ?>
-
+    <script>
+  window.slides = [
+    "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/3-Frame.png",
+    "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/4-Frame.png",
+    "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/5-Frame.png",
+    "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/6-Frame.png",
+  ];
+</script>
     <body <?php body_class("template-login $extra_classes"); ?> x-data>
       <!-- Header -->
 
@@ -570,8 +452,6 @@
         </div>
         </div>
 
-        <!-- ✅ Spacer to prevent layout shift when sticky -->
-        <div :class="isSticky ? 'h-[100px]' : ''"></div>
       <?php endif; ?>
       </div>
       <script>

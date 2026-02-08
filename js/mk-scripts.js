@@ -33,7 +33,7 @@ document.addEventListener('alpine:init', () => {
     }
   });
 
-  // 🧭 Lyssna på tillbaka-knappen
+ 
   window.addEventListener('popstate', (event) => {
     const huntParam = new URLSearchParams(window.location.search).get('hunt');
     const store = Alpine.store('adventureModal');

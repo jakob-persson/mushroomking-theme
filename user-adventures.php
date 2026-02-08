@@ -401,48 +401,47 @@ $mushroom_icons = [
 
      <div class="fb-profile-wrapper relative w-full h-full">
 
-  <?php if ($show_placeholder): ?>
-    <!-- Placeholder -->
-    <div
-      id="profile-placeholder"
-      class="absolute inset-0 flex items-center justify-center rounded-[150px] bg-white/70 border border-black/10 z-10">
-      <div class="flex flex-col items-center gap-2 text-[#111827]/70">
-        <i class="fas fa-image text-3xl"></i>
-        <span class="text-sm font-medium">Add profile image</span>
+        <?php if ($show_placeholder): ?>
+          <!-- Placeholder -->
+          <div
+            id="profile-placeholder"
+            class="absolute inset-0 flex items-center justify-center rounded-[150px] bg-white/70 border border-black/10 z-10">
+            <div class="flex flex-col items-center gap-2 text-[#111827]/70">
+              <i class="fas fa-image text-3xl"></i>
+              <span class="text-sm font-medium">Add profile image</span>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <!-- Profile image (alltid i DOM) -->
+        <img
+          src="<?= esc_url($profile_img_url); ?>"
+          alt="<?= esc_attr($user->display_name); ?> profile picture"
+          class="px-4 lg:px-0 w-[720px] max-w-full rounded-[150px] h-[220px] lg:h-[400px] object-cover drop-shadow-xl transition-opacity duration-150
+            <?= ($show_placeholder && $debug_no_image) ? 'opacity-0' : 'opacity-100' ?>"
+        >
+
+        <?php if (is_user_logged_in() && get_current_user_id() == $user->ID): ?>
+          <!-- Kamera-badge -->
+          <div
+            id="profile-camera-badge"
+            class="fb-camera-badge"
+            style="<?= $has_image && !$debug_no_image ? 'display:flex;' : 'display:none;' ?>">
+            <i class="fas fa-camera"></i>
+          </div>
+
+          <!-- Upload -->
+          <form method="post" enctype="multipart/form-data">
+            <input
+              type="file"
+              name="profile_image_upload"
+              id="profile_image_upload"
+              class="hidden"
+              accept="image/*">
+          </form>
+        <?php endif; ?>
+
       </div>
-    </div>
-  <?php endif; ?>
-
-  <!-- Profile image (alltid i DOM) -->
-  <img
-    id="profile-preview-img"
-    src="<?= esc_url($profile_img_url); ?>"
-    alt="<?= esc_attr($user->display_name); ?> profile picture"
-    class="px-4 lg:px-0 w-[720px] max-w-full rounded-[150px] h-[220px] lg:h-[400px] object-cover drop-shadow-xl transition-opacity duration-150
-      <?= ($show_placeholder && $debug_no_image) ? 'opacity-0' : 'opacity-100' ?>"
-  >
-
-  <?php if (is_user_logged_in() && get_current_user_id() == $user->ID): ?>
-    <!-- Kamera-badge -->
-    <div
-      id="profile-camera-badge"
-      class="fb-camera-badge"
-      style="<?= $has_image && !$debug_no_image ? 'display:flex;' : 'display:none;' ?>">
-      <i class="fas fa-camera"></i>
-    </div>
-
-    <!-- Upload -->
-    <form method="post" enctype="multipart/form-data">
-      <input
-        type="file"
-        name="profile_image_upload"
-        id="profile_image_upload"
-        class="hidden"
-        accept="image/*">
-    </form>
-  <?php endif; ?>
-
-</div>
 
 
 

@@ -307,7 +307,7 @@
 
 <!-- Hero Section -->
 <div class="bg-[#124C12] pb-12 overflow-hidden">
-  <div class="section-wrapper flex flex-col lg:flex-row justify-center items-center gap-10 lg:min-h-[88vh]">
+  <div class="section-wrapper flex flex-col lg:flex-row justify-center items-center gap-10 lg:min-h-[88vh] overflow-hidden">
 
     <!-- Text Column -->
     <div class="flex-none lg:flex-1 text-left mb-4 flex flex-col justify-start pt-6 lg:pt-0">
@@ -333,11 +333,54 @@
       <?php endif; ?>
     </div>
 
-    <!-- Image Collage Column -->
-    <div class="flex-none w-full lg:flex-1 flex justify-center items-center mt-8 lg:mt-0 px-4">
-      <img src="<?= get_template_directory_uri(); ?>/images/main-screen.png" alt="Illustration">
+    <!-- RIGHT VISUAL (SLIDER) -->
+<div class="relative flex justify-center lg:justify-end pt-16 lg:pt-0 z-1 w-full lg:flex-1 lg:px-8 mb-8 lg:mb-0">
+  <div
+    x-data="slider()"
+    x-init="init()"
+    x-ref="wrapper"
 
+    @mouseenter="pause()"
+    @mouseleave="resume()"
+
+    @pointerdown.prevent="startDrag($event)"
+    @pointermove.prevent="onDrag($event)"
+    @pointerup="endDrag()"
+    @pointercancel="endDrag()"
+    @pointerleave="endDrag()"
+
+    :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+    :style="isMobile
+      ? 'touch-action: pan-x; user-select: none;'
+      : 'touch-action: none; user-select: none;'"
+
+    class="relative w-full aspect-square lg:aspect-auto lg:w-[520px] lg:h-[520px] overflow-hidden lg:overflow-visible -mt-6"
+  >
+    <!-- TRACK -->
+    <div
+      class="absolute inset-0 transition-transform ease-out flex lg:flex-col"
+      :class="isMoving ? 'duration-[2000ms]' : 'duration-0'"
+      :style="transformStyle"
+    >
+      <template x-for="(src, i) in slides" :key="i">
+        <div
+          data-slide
+          class="flex-shrink-0 w-full h-full aspect-square lg:aspect-square"
+          :style="isMobile
+            ? `margin-right: ${gap}px`
+            : `margin-bottom: ${gap}px`"
+        >
+          <img
+            :src="src"
+            alt=""
+            class="w-full h-full object-cover rounded-2xl"
+          />
+        </div>
+      </template>
+    </div>
   </div>
+</div>
+
 </div>
 
 <?php endif; ?>
@@ -396,6 +439,7 @@
 
   </div>
 </section>
+
 <?php endif; ?>
 
 <?php if ( is_user_logged_in() ) : ?>
@@ -407,8 +451,6 @@
     </div>
 
     <?php endif; ?>
-    <?php get_template_part('partials/modal-summary-adventure');
- ?>
  <?php get_template_part('partials/modal', 'edit-adventure'); ?>
  <?php get_template_part('partials/modal', 'adventure'); ?>
 <?php get_footer(); ?>
@@ -515,8 +557,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   observer.observe(sentinel);
-
-  // ✅ iOS-säkring: om observer strular, trigga även när man är nära botten
   window.addEventListener("scroll", () => {
     if (done || loading) return;
     const rect = sentinel.getBoundingClientRect();
@@ -526,3 +566,164 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
+<script>
+function slider() {
+  return {
+    slides: window.slides || [],
+    index: 0,
+    gap: 32,
+    offset: 0,
+    isMoving: true,
+    isMobile: false,
+    slideSize: 0,
+    slideDelay: 3000,
+    timer: null,
+    isPaused: false,
+
+    isDragging: false,
+    dragStartPos: 0,
+    dragStartOffset: 0,
+
+    get transformStyle() {
+      return this.isMobile
+        ? `transform: translateX(${this.offset}px)`
+        : `transform: translateY(${this.offset}px)`
+    },
+
+    init() {
+      this.$nextTick(() => {
+        this.isMobile = window.innerWidth < 1024
+
+        // duplicate slides for infinite loop
+        this.slides = [...this.slides, ...this.slides]
+
+        const slide = this.$refs.wrapper.querySelector('[data-slide]')
+        if (!slide) return
+
+        this.slideSize = this.isMobile
+          ? slide.offsetWidth + this.gap
+          : slide.offsetHeight + this.gap
+
+        this.offset = 0
+        this.startAutoplay()
+
+        // (valfritt men bra) uppdatera vid resize
+        window.addEventListener('resize', () => {
+          const wasMobile = this.isMobile
+          this.isMobile = window.innerWidth < 1024
+          if (wasMobile !== this.isMobile) {
+            this.pause()
+            this.index = 0
+            this.offset = 0
+            const slide2 = this.$refs.wrapper.querySelector('[data-slide]')
+            if (!slide2) return
+            this.slideSize = this.isMobile
+              ? slide2.offsetWidth + this.gap
+              : slide2.offsetHeight + this.gap
+            this.resume()
+          }
+        }, { passive: true })
+      })
+    },
+
+    startAutoplay() {
+      const run = () => {
+        if (this.isPaused) return
+
+        this.isMoving = true
+        this.offset = -(this.index * this.slideSize)
+
+        const nextIndex = this.index + 1
+
+        this.timer = setTimeout(() => {
+          if (this.isPaused) return
+
+          if (nextIndex >= this.slides.length / 2) {
+            // reset loop
+            this.isMoving = false
+            this.index = 0
+            this.offset = 0
+
+            requestAnimationFrame(() => {
+              this.isMoving = true
+              this.timer = setTimeout(() => {
+                this.index = 1
+                run()
+              }, this.slideDelay)
+            })
+          } else {
+            this.index = nextIndex
+            run()
+          }
+        }, this.slideDelay)
+      }
+
+      run()
+    },
+
+    pause() {
+      this.isPaused = true
+      clearTimeout(this.timer)
+    },
+
+    resume() {
+      if (!this.isPaused) return
+      this.isPaused = false
+      this.startAutoplay()
+    },
+
+    startDrag(e) {
+      this.isDragging = true
+      this.isMoving = false
+      this.$refs.wrapper.setPointerCapture(e.pointerId)
+
+      this.dragStartPos = this.isMobile ? e.clientX : e.clientY
+      this.dragStartOffset = this.offset
+
+      this.pause()
+    },
+
+    onDrag(e) {
+      if (!this.isDragging) return
+
+      const currentPos = this.isMobile ? e.clientX : e.clientY
+      const delta = currentPos - this.dragStartPos
+      const targetOffset = this.dragStartOffset + delta
+
+      const lerp = (start, end, amt) => start + (end - start) * amt
+      this.offset = lerp(this.offset, targetOffset, 0.2)
+    },
+
+    endDrag() {
+      if (!this.isDragging) return
+
+      this.isDragging = false
+      this.isMoving = true
+
+      const diff = this.offset - this.dragStartOffset
+      const threshold = this.slideSize * 0.10
+
+      let newIndex = this.index
+      if (diff < -threshold) newIndex = this.index + 1
+      else if (diff > threshold) newIndex = this.index - 1
+
+      const maxIndex = this.slides.length / 2 - 1
+      newIndex = Math.max(0, Math.min(newIndex, maxIndex))
+      this.index = newIndex
+
+      const targetOffset = -(this.index * this.slideSize)
+      const animate = () => {
+        this.offset += (targetOffset - this.offset) * 0.2
+        if (Math.abs(this.offset - targetOffset) > 0.5) {
+          requestAnimationFrame(animate)
+        } else {
+          this.offset = targetOffset
+        }
+      }
+      requestAnimationFrame(animate)
+
+      this.resume()
+    },
+  }
+}
+</script>

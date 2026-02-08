@@ -11,9 +11,7 @@
 // });
 
 function jsp_enqueue_assets() {
-
     wp_enqueue_style('fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
-
     wp_enqueue_style(
         'jsp-style',
         get_stylesheet_uri(),
@@ -21,18 +19,15 @@ function jsp_enqueue_assets() {
         filemtime(get_stylesheet_directory() . '/style.css')
     );
 
+ wp_enqueue_script(
+    'mk-front',
+    get_template_directory_uri() . '/js/mk-front.js',
+    [], // dependencies (lägg t.ex. ['jquery'] om du använder jQuery)
+    filemtime(get_template_directory() . '/js/mk-front.js'),
+    true // load i footer
+  );
 
 add_action('wp_enqueue_scripts', 'jsp_enqueue_assets');
-
-
-    wp_enqueue_script(
-        'alpine',
-        'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
-        [],
-        null,
-        true
-    );
-
     wp_enqueue_script(
         'modal-add-adventure',
         get_stylesheet_directory_uri() . '/assets/js/modal-add-adventure.js',
@@ -263,6 +258,25 @@ function mk_user_template_redirect() {
 }
 
 add_action('template_redirect', 'mk_user_template_redirect');
+
+// Remove WordPress emoji CSS and JS
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('wp_print_styles', 'print_emoji_styles');
+
+remove_action('admin_print_scripts', 'print_emoji_detection_script');
+remove_action('admin_print_styles', 'print_emoji_styles');
+
+remove_filter('the_content_feed', 'wp_staticize_emoji');
+remove_filter('comment_text_rss', 'wp_staticize_emoji');
+remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
+
+// Remove TinyMCE emoji plugin
+add_filter('tiny_mce_plugins', function ($plugins) {
+    if (is_array($plugins)) {
+        return array_diff($plugins, ['wpemoji']);
+    }
+    return [];
+});
 
 
 // ======================

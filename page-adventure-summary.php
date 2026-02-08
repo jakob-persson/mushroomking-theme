@@ -200,13 +200,12 @@ $user_data = get_userdata($hunt->user_id ?? 0);
 
             <!-- DOTS -->
             <div class="absolute bottom-4 flex gap-2">
-                <button
-                    x-for="(p,i) in photos" :key="i"
-                    @click="index = i"
-                    class="w-3 h-3 rounded-full focus:outline-none"
-                    :class="index === i ? 'bg-white' : 'bg-white/40'"
-                    :aria-label="`Go to photo ${i+1}`"
-                ></button>
+            <button
+                x-for="(p,i) in photos" :key="i"
+                @click="index = i"
+                class="w-3 h-3 rounded-full"
+                :class="index === i ? 'bg-white' : 'bg-white/40'"
+            ></button>
             </div>
         </div>
 

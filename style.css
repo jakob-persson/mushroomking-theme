@@ -9,15 +9,13 @@ Version: 1.0
 
 
 @font-face {
-    font-family: 'Gilroy';
-    src: url('fonts/gilroy/Gilroy-Heavy.eot');
-    src: url('fonts/gilroy/Gilroy-Heavy.eot?#iefix') format('embedded-opentype'),
-        url('fonts/gilroy/fonts/Gilroy-Heavy.woff2') format('woff2'),
-        url('fonts/gilroy/Gilroy-Heavy.woff') format('woff'),
-        url('fonts/gilroy/Gilroy-Heavy.svg#Gilroy-Heavy') format('svg');
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Gilroy';
+  src:
+    url('fonts/gilroy/Gilroy-Heavy.woff2') format('woff2'),
+    url('fonts/gilroy/Gilroy-Heavy.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
