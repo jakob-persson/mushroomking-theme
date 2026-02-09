@@ -94,6 +94,7 @@
     "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/4-Frame.png",
     "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/5-Frame.png",
     "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/6-Frame.png",
+    "<?= esc_js(get_template_directory_uri()); ?>/images/hero-slides/7-Frame.png",
   ];
 </script>
     <body <?php body_class("template-login $extra_classes"); ?> x-data>
