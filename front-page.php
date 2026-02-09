@@ -354,7 +354,7 @@
       ? 'touch-action: pan-x; user-select: none;'
       : 'touch-action: none; user-select: none;'"
 
-    class="relative w-full aspect-square lg:aspect-auto lg:w-[520px] lg:h-[520px] 2xl:w-[620px] 2xl:h-[620px] overflow-hidden lg:overflow-visible -mt-6"
+    class="relative w-full aspect-square lg:aspect-auto lg:w-[540px] lg:h-[540px] 2xl:w-[620px] 2xl:h-[620px] overflow-hidden lg:overflow-visible -mt-6"
   >
     <!-- TRACK -->
     <div
