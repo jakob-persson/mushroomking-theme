@@ -1,0 +1,44 @@
+/* Fonts (Vite-bundled) — MUST be above @tailwind */
+@font-face {
+  font-family: "Gilroy";
+  src:
+    url("../fonts/gilroy/Gilroy-Heavy.woff2") format("woff2"),
+    url("../fonts/gilroy/Gilroy-Heavy.woff") format("woff");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Link Sans";
+  src:
+    url("../fonts/link/LinkSans-Light.woff2") format("woff2"),
+    url("../fonts/link/LinkSans-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Link Sans";
+  src:
+    url("../fonts/link/LinkSans-Medium.woff2") format("woff2"),
+    url("../fonts/link/LinkSans-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Link Sans", "Gilroy", sans-serif !important;
+  font-weight: 300 !important;
+}
+
+.gilroy {
+  font-family: "Gilroy" !important;
+  font-weight: 900;
+}
