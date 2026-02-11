@@ -1,6 +1,8 @@
 @php
   $cover = $adv->coverPhoto;
-  $image = $cover ? asset('storage/' . $cover->path) : null;
+
+  $feedImage  = $cover ? asset('storage/' . $cover->feed_path) : null; // ✅ feed 1080
+  $modalImage = $cover ? asset('storage/' . $cover->path) : null;      // ✅ modal ratio
 
   $isOwner = auth()->check() && auth()->id() === $adv->user_id;
 
@@ -11,17 +13,15 @@
 
   $date = optional($adv->start_date)->format('Y-m-d');
 
-  // ⚠️ Byt till din riktiga avatar-källa om du har en annan
-  $avatar = $adv->user?->avatar_url ?? null; // ex: $adv->user?->avatarUrl()
+  $avatar = $adv->user?->avatar_url ?? null;
   $name   = $adv->user?->name ?? 'Anonymous';
 
-  // payload för "view" modal
   $payload = [
     'id' => $adv->id,
     'location' => $adv->location,
     'start_date' => $date,
     'adventure_text' => $adv->adventure_text,
-    'image' => $image,
+    'image' => $modalImage, // ✅ modal
     'total_kg' => $totalKg,
     'user' => [
       'name' => $name,
@@ -29,7 +29,6 @@
     ],
   ];
 
-  // payload för edit modal
   $editPayload = [
     'id' => $adv->id,
     'location' => $adv->location,
@@ -39,7 +38,7 @@
     'total_kg' => $totalKg,
     'photos' => ($adv->photos ?? collect())->map(fn($p) => [
       'id' => $p->id,
-      'url' => asset('storage/' . $p->path),
+      'url' => asset('storage/' . $p->path), // ✅ modal ratio i edit
       'sort' => $p->sort,
     ])->values(),
   ];
@@ -52,8 +51,8 @@
 >
   {{-- IMAGE (full bleed) --}}
   <div class="relative aspect-square bg-gray-200">
-    @if($image)
-      <img src="{{ $image }}" class="absolute inset-0 w-full h-full object-cover" alt="">
+    @if($feedImage)
+  <img src="{{ $feedImage }}" loading="lazy" class="absolute inset-0 w-full h-full object-cover" alt="">
     @else
       <div class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">
         No image

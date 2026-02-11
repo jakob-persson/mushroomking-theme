@@ -698,11 +698,20 @@ function mkCreateAdventureModal() {
           body: formData,
         });
 
-        const result = await res.json();
+       const raw = await res.text();
+        let result = null;
+
+        try {
+          result = JSON.parse(raw);
+        } catch (e) {
+          console.error("Non-JSON response:", raw);
+          throw new Error(`Server returned non-JSON (status ${res.status}). Check console + storage/logs/laravel.log`);
+        }
 
         if (!res.ok || !result?.success) {
-          throw new Error(result?.message || "Save failed");
+          throw new Error(result?.message || `Save failed (status ${res.status})`);
         }
+
 
         this.isPublishing = false;
         this.published = true;

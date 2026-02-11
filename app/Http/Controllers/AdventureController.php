@@ -6,6 +6,7 @@ use App\Models\Adventure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 
 class AdventureController extends Controller
 {
@@ -18,8 +19,9 @@ class AdventureController extends Controller
             'start_date'     => ['nullable', 'date'],
             'adventure_text' => ['nullable', 'string', 'max:5000'],
             'types'          => ['required', 'string'],
+
             'photos'         => ['nullable', 'array', 'max:10'],
-            'photos.*'       => ['file', 'image', 'max:5120'],
+            'photos.*'       => ['file', 'image', 'max:24576'], // ✅ 24MB
         ]);
 
         $types = json_decode($validated['types'] ?? '', true);
@@ -44,11 +46,12 @@ class AdventureController extends Controller
                 foreach (array_values((array) $files) as $i => $file) {
                     if (!$file || !$file->isValid()) continue;
 
-                    $path = $file->store("adventures/{$adventure->id}", 'public');
+                    $saved = $this->storeVariants($file, $adventure->id);
 
                     $adventure->photos()->create([
-                        'path' => $path,
-                        'sort' => $i,
+                        'path'      => $saved['path'],       // ✅ large ratio
+                        'feed_path' => $saved['feed_path'],  // ✅ 1080x1080
+                        'sort'      => $i,
                     ]);
                 }
 
@@ -89,7 +92,7 @@ class AdventureController extends Controller
 
             // nya uploads (valfritt)
             'photos'         => ['nullable', 'array', 'max:10'],
-            'photos.*'       => ['file', 'image', 'max:5120'],
+            'photos.*'       => ['file', 'image', 'max:24576'], // ✅ 24MB
 
             // ids på bilder som användaren tog bort i edit (JSON array)
             'remove_photo_ids' => ['nullable', 'string'],
@@ -117,12 +120,19 @@ class AdventureController extends Controller
                     'types'          => $types,
                 ]);
 
-                // ta bort valda befintliga foton (DB + fil)
+                // ta bort valda befintliga foton (DB + filer)
                 if (!empty($removeIds)) {
                     $photosToDelete = $adventure->photos()->whereIn('id', $removeIds)->get();
+
                     foreach ($photosToDelete as $p) {
-                        Storage::disk('public')->delete($p->path);
+                        if ($p->path) {
+                            Storage::disk('public')->delete($p->path);
+                        }
+                        if ($p->feed_path) {
+                            Storage::disk('public')->delete($p->feed_path);
+                        }
                     }
+
                     $adventure->photos()->whereIn('id', $removeIds)->delete();
                 }
 
@@ -133,11 +143,12 @@ class AdventureController extends Controller
                 foreach (array_values((array) $files) as $i => $file) {
                     if (!$file || !$file->isValid()) continue;
 
-                    $path = $file->store("adventures/{$adventure->id}", 'public');
+                    $saved = $this->storeVariants($file, $adventure->id);
 
                     $adventure->photos()->create([
-                        'path' => $path,
-                        'sort' => $existingCount + $i,
+                        'path'      => $saved['path'],
+                        'feed_path' => $saved['feed_path'],
+                        'sort'      => $existingCount + $i,
                     ]);
                 }
 
@@ -181,10 +192,15 @@ class AdventureController extends Controller
             $adventure->load('photos');
 
             foreach ($adventure->photos as $p) {
-                Storage::disk('public')->delete($p->path);
+                if ($p->path) {
+                    Storage::disk('public')->delete($p->path);
+                }
+                if ($p->feed_path) {
+                    Storage::disk('public')->delete($p->feed_path);
+                }
             }
-            $adventure->photos()->delete();
 
+            $adventure->photos()->delete();
             $adventure->delete();
 
             return response()->json(['success' => true]);
@@ -205,7 +221,9 @@ class AdventureController extends Controller
     private function adventureResponse(Adventure $adventure, int $status)
     {
         $adventure->load(['user', 'photos']);
-        $photos = collect($adventure->photos ?? []);
+        $photos = collect($adventure->photos ?? [])->sortBy([
+            fn ($a, $b) => ($a->sort <=> $b->sort) ?: ($a->id <=> $b->id),
+        ])->values();
 
         return response()->json([
             'success' => true,
@@ -221,14 +239,48 @@ class AdventureController extends Controller
                     'slug' => $adventure->user?->slug,
                 ],
                 'photos' => $photos->map(fn ($p) => [
-                    'id'   => $p->id,
-                    'url'  => asset('storage/' . $p->path),
-                    'sort' => $p->sort,
+                    'id'       => $p->id,
+                    'url'      => $p->path ? asset('storage/' . $p->path) : null,         // ✅ modal ratio
+                    'feed_url' => $p->feed_path ? asset('storage/' . $p->feed_path) : null, // ✅ feed 1080x1080
+                    'sort'     => $p->sort,
                 ])->values(),
-                'cover' => $photos->first()
-                    ? asset('storage/' . $photos->first()->path)
+                'cover' => $photos->first() && $photos->first()->feed_path
+                    ? asset('storage/' . $photos->first()->feed_path) // ✅ feed cover
                     : null,
             ],
         ], $status);
     }
+
+    // ---- Helper: sparar webp-varianter (modal ratio + feed 1080x1080) ----
+   private function storeVariants($file, int $adventureId): array
+{
+    $quality = 82;
+    $largeMax = 2400;
+    $feedSize = 1080;
+
+    $img = Image::read($file->getPathname());
+
+    $base = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+    $base = preg_replace('/[^a-zA-Z0-9\-_]+/', '-', $base);
+    $base = trim($base, '-') ?: 'photo';
+
+    $name = $base . '-' . uniqid() . '.webp';
+    $dir = "adventures/{$adventureId}";
+
+    $largePath = "{$dir}/{$name}";
+    $feedPath  = "{$dir}/feed-{$name}";
+
+    // ✅ PHP clone istället för ->clone()
+    $large = (clone $img)->scaleDown(width: $largeMax, height: $largeMax);
+    Storage::disk('public')->put($largePath, (string) $large->toWebp($quality));
+
+    $feed = (clone $img)->cover($feedSize, $feedSize);
+    Storage::disk('public')->put($feedPath, (string) $feed->toWebp($quality));
+
+    return [
+        'path' => $largePath,
+        'feed_path' => $feedPath,
+    ];
+}
+
 }
