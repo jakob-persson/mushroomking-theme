@@ -18,8 +18,8 @@
         <!-- Left: Logo + Nav -->
         <div class="flex items-center">
           <div class="w-[28px] lg:w-[62px] lg:border-r lg:border-[#111827] lg:pr-4">
-            <a href="{{ url('/') }}">
-              <img src="{{ asset('images/mk-logo2.png') }}" alt="Logo">
+            <a href="{{ route('feed.index') }}">
+              <img src="{{ asset('images/mk-logo.png') }}" alt="Mushroom King" class="h-auto w-10">
             </a>
           </div>
 

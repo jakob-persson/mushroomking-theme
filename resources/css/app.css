@@ -42,3 +42,121 @@ body {
   font-family: "Gilroy" !important;
   font-weight: 900;
 }
+
+
+/* Mobile first: default styles apply here */
+
+/* Tablets & small screens (up to 1024px) */
+@media (max-width: 1024px) {
+  .section-wrapper {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 10px;
+  }
+}
+
+/* Desktop (1025px – 1619px) */
+@media (min-width: 1025px) and (max-width: 1619px) {
+  .section-wrapper {
+    max-width: 90% !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Large screens (1620px+) */
+@media (min-width: 1620px) {
+  .section-wrapper {
+    max-width: 1504px !important;
+    margin: 0 auto !important;
+  
+  }
+}
+
+
+.dark {
+    color:#1E2330!important
+}
+
+/* Hide scrollbar for webkit browsers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* Hide scrollbar for Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+/* Base input style */
+input {
+  background-color: #F6F7F5 !important;
+  color: #1E2330 !important;
+}
+
+/* Remove Chrome autofill yellow */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 1000px #F6F7F5 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #F6F7F5 inset !important;
+  -webkit-text-fill-color: #1E2330 !important;
+  caret-color: #1E2330 !important; /* keeps cursor color consistent */
+}
+
+/* Remove Firefox autofill background */
+input:autofill,
+textarea:autofill {
+  background-color: #F6F7F5 !important;
+  color: #1E2330 !important;
+}
+
+button:hover {
+  opacity: .8
+}
+
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: #1E2330!important;
+    box-shadow: 0 0 0 2px rgba(30, 35, 48, 0.2); /* subtle glow */
+}
+
+
+
+.fb-camera-badge {
+    position: absolute;
+    bottom: 0px;
+    right: 50px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    cursor: pointer;
+    font-size: 20px;
+}
+
+
+@media (min-width: 1024px) {
+    body.logged-in-frontpage {
+        overflow: hidden !important;
+    }
+
+    body.logged-in-frontpage .adventure-feed {
+        overflow-y: auto; 
+        min-height: 100vh;
+    }
+
+    body.logged-in-frontpage .left-column {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+}
+

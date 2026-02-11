@@ -10,9 +10,11 @@
 
 <script>
 window.slides = [
-  "{{ asset('images/landing/slide-1.jpg') }}",
-  "{{ asset('images/landing/slide-2.jpg') }}",
-  "{{ asset('images/landing/slide-3.jpg') }}",
+  "{{ asset('images/landing/1-frame.png') }}",
+  "{{ asset('images/landing/2-frame.png') }}",
+  "{{ asset('images/landing/3-frame.png') }}",
+  "{{ asset('images/landing/4-frame.png') }}",
+  "{{ asset('images/landing/5-frame.png') }}",
 ];
 </script>
 
@@ -20,7 +22,7 @@ window.slides = [
 <body class="bg-[#124C12]">
   @include('partials.header')
 
-<div class="min-h-screen flex items-center">
+<div class="lg:min-h-[88vh] flex items-center overflow-hidden">
 
 <div class="max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-12 items-center">
 
@@ -61,7 +63,7 @@ x-ref="wrapper"
 @pointercancel="endDrag()"
 @pointerleave="endDrag()"
 
-class="relative w-full aspect-square lg:w-[540px] lg:h-[540px] overflow-hidden"
+class="relative w-full aspect-square lg:w-[540px] lg:h-[540px]"
 >
 
 <div
@@ -95,6 +97,61 @@ class="w-full h-full object-cover rounded-2xl"
 </div>
 
 </div>
+
+<section class="bg-[#F5F5F3] py-20">
+  <div class="section-wrapper mx-auto grid lg:grid-cols-2 gap-12 items-center">
+
+    <!-- left -->
+    <div class="flex flex-col">
+    <h1 class="text-5xl lg:text-[82px] dark gilroy leading-[54px] lg:leading-[82px] lg:w-full">
+        How to get<br>started<br>in 3 simple<br> steps
+      </h1>
+      <p class="text-[#1E2330]/70 text-lg max-w-md my-2">
+      Join, log, and explore — your season starts with a free account.
+      </p>
+      <a href="mk/register" class="mt-6 bg-[#1E2330] px-6 py-4 rounded-full font-medium text-white hover:opacity-90 w-auto self-start">
+        Create account
+      </a>
+    </div>
+
+<!-- Right -->
+<div class="flex flex-col sm:flex-row gap-6 justify-center">
+  <!-- card 1 -->
+  <div class="bg-[#DAB6E4] rounded-2xl p-8 w-full sm:w-1/3 flex flex-col items-start">
+    <div class="bg-white text-[#1E2330] font-bold w-10 h-10 flex items-center justify-center rounded-full mb-4">
+      1
+    </div>
+    <h3 class="font-semibold text-lg mb-2 leading-[24px]">Create a free account</h3>
+    <p class="text-[#1E1E1E]/70 text-sm">
+      To get started, simply create your free account to begin your foraging journey.
+    </p>
+  </div>
+
+  <!-- card 2 -->
+  <div class="bg-[#DAB6E4] rounded-2xl p-8 w-full sm:w-1/3 flex flex-col items-start">
+    <div class="bg-white text-[#1E1E1E] font-bold w-10 h-10 flex items-center justify-center rounded-full mb-4">
+      2
+    </div>
+    <h3 class="font-semibold text-lg mb-2 leading-[24px]">Start adding adventures</h3>
+    <p class="text-[#1E1E1E]/70 text-sm">
+      Log your foraging trips, add photos, locations, and notes about your mushroom finds.
+    </p>
+  </div>
+
+  <!-- card 3 -->
+  <div class="bg-[#DAB6E4] rounded-2xl p-8 w-full sm:w-1/3 flex flex-col items-start">
+    <div class="bg-white text-[#1E1E1E] font-bold w-10 h-10 flex items-center justify-center rounded-full mb-4">
+      3
+    </div>
+    <h3 class="font-semibold text-lg mb-2 leading-[24px]">Explore your stats</h3>
+    <p class="text-[#1E1E1E]/70 text-sm">
+      See insights from your season — top harvests, total weight, and your favorite locations.
+    </p>
+  </div>
+</div>
+
+  </div>
+</section>
 
 </body>
 </html>
