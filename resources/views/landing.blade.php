@@ -30,7 +30,7 @@ window.slides = [
 <div>
 
 <h1 class="text-5xl lg:text-[82px] text-[#CEE027] leading-[82px] gilroy font-black font-weight: 700">
-  Test, Share & Explore<br>
+  Testing, Share & Explore<br>
   Your Mushroom Season
 </h1>
 
